@@ -3,7 +3,7 @@ build file for ant
 http://jakarta.apache.org/ant/index.html
 -->
 
-<project name="salaryslip" default="all" basedir=".">
+<project name="payslip" default="all" basedir=".">
   <property name="version"  value="2.2"/>
   <property name="src" value="."/>
   <property name="build" value="./build"/>
@@ -35,18 +35,18 @@ http://jakarta.apache.org/ant/index.html
     <mkdir dir="${build}"/>
   </target>   
 
-  <target name="salaryslip" depends="init">
+  <target name="payslip" depends="init">
     <javac srcdir="${src}" debug="${debug}" optimize="${optimize}"
       classpathref="classpath"  destdir="${build}"
-      includes="com/moneydance/modules/features/salaryslip/**"/>
+      includes="com/moneydance/modules/features/payslip/**"/>
 
-    <jar destfile="${dist}/salaryslip.mxt">
+    <jar destfile="${dist}/payslip.mxt">
       <fileset dir="${src}" includes="
-             com/moneydance/modules/features/salaryslip/meta_info.dict
-             com/moneydance/modules/features/salaryslip/*.gif
-             com/moneydance/modules/features/salaryslip/*.jpg
-             com/moneydance/modules/features/salaryslip/*.jpeg"/>
-      <fileset dir="${build}" includes="com/moneydance/modules/features/salaryslip/**"/>
+             com/moneydance/modules/features/payslip/meta_info.dict
+             com/moneydance/modules/features/payslip/*.gif
+             com/moneydance/modules/features/payslip/*.jpg
+             com/moneydance/modules/features/payslip/*.jpeg"/>
+      <fileset dir="${build}" includes="com/moneydance/modules/features/payslip/**"/>
     </jar>
 
     <java newenvironment="true" 
@@ -55,10 +55,10 @@ http://jakarta.apache.org/ant/index.html
       <arg value="signextjar"/>
       <arg value="${privkeyfile}"/>
       <arg value="${privkeyid}"/>
-      <arg value="salaryslip"/>
-      <arg line="${dist}/salaryslip.mxt"/>
+      <arg value="payslip"/>
+      <arg line="${dist}/payslip.mxt"/>
     </java>
-    <move file="${src}/s-salaryslip.mxt" tofile="${dist}/salaryslip.mxt"/>
+    <move file="${src}/s-payslip.mxt" tofile="${dist}/payslip.mxt"/>
   </target>
 
   <target name="genkeys">
@@ -71,6 +71,6 @@ http://jakarta.apache.org/ant/index.html
     </java>
   </target>
 
-  <target name="all" depends="salaryslip"/>
+  <target name="all" depends="payslip"/>
 
 </project>

@@ -2,7 +2,7 @@
  *      Copyright (C) 2016 The Infinite Kind, Limited       *
 \************************************************************/
 
-package com.moneydance.modules.features.salaryslip;
+package com.moneydance.modules.features.payslip;
 
 import com.moneydance.awt.*;
 import com.infinitekind.moneydance.model.*;

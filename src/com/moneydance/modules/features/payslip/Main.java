@@ -2,16 +2,12 @@
  *      Copyright (C) 2016 The Infinite Kind, Limited       *
 \************************************************************/
 
-package com.moneydance.modules.features.salaryslip;
+package com.moneydance.modules.features.payslip;
 
 import com.moneydance.apps.md.controller.FeatureModule;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
-import com.moneydance.apps.md.controller.ModuleUtil;
-import com.moneydance.apps.md.controller.UserPreferences;
 
 import java.io.*;
-import java.util.*;
-import java.text.*;
 import java.awt.*;
 
 /** Pluggable module used to give users access to a Account List
@@ -45,7 +41,7 @@ public class Main
     try {
       ClassLoader cl = getClass().getClassLoader();
       java.io.InputStream in = 
-        cl.getResourceAsStream("/com/moneydance/modules/features/salaryslip/icon.gif");
+        cl.getResourceAsStream("/com/moneydance/modules/features/payslip/icon.gif");
       if (in != null) {
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
         byte buf[] = new byte[256];

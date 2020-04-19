@@ -1,0 +1,10 @@
+.idea
+*.iml
+*.swp
+src/priv_key
+src/pub_key
+lib/extadmin.jar
+lib/moneydance-dev.jar
+*.moneydance
+out/
+src/build
