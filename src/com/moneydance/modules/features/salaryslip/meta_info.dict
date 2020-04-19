@@ -1,0 +1,9 @@
+{
+  "vendor" = "Your Name Here"
+  "module_build" = "1"
+  "minbuild" = "1000"
+  "vendor.url" = "http://your.url.here/"
+  "module_name" = "My Extension"
+  "module_desc" = "<html><body><title>My Extension</title><p>An HTML description of your extension goes here.</p></body></html>"
+  "desc" = "A text description of your extension goes here."
+}
