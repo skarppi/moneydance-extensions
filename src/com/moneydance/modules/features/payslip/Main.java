@@ -7,8 +7,9 @@ package com.moneydance.modules.features.payslip;
 import com.moneydance.apps.md.controller.FeatureModule;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
 
-import java.io.*;
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 /** Pluggable module used to give users access to a Account List
     interface to Moneydance.

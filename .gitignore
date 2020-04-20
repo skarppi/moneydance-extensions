@@ -8,3 +8,4 @@ lib/moneydance-dev.jar
 *.moneydance
 out/
 src/build
+dist
