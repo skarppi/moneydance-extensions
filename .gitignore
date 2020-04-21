@@ -9,3 +9,4 @@ lib/moneydance-dev.jar
 out/
 src/build
 dist
+.jython_cache

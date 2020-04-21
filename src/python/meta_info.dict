@@ -1,0 +1,11 @@
+{
+  "extension_type" = "python"
+  "id" = "payslip"
+  "vendor" = "Juho Kolehmainen"
+  "module_build" = "1"
+  "minbuild" = "1000"
+  "vendor.url" = "https://github.com/skarppi/payslip"
+  "module_name" = "Payslip"
+  "module_desc" = "<html><body><title>Payslip</title><p>Calculate payslip transactions with taxes and bonuses.</p></body></html>"
+  "desc" = "Calculate payslip transactions with taxes and bonuses"
+}

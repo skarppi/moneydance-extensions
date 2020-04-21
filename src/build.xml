@@ -20,6 +20,8 @@ http://jakarta.apache.org/ant/index.html
   <property name="debug"  value="on"/>
   <property name="optimize"  value="off"/>
 
+  <property name="install"  value="${user.home}//Library/Containers/com.infinitekind.MoneydanceOSX/Data/Library/Application Support/Moneydance/fmodules"/>
+
   <property name="javac.compatibility.source.version" value="11"/>
   <property name="javac.compatibility.bytecode.version" value="11"/>
   <property name="ant.build.javac.target" value="11"/>
@@ -40,6 +42,7 @@ http://jakarta.apache.org/ant/index.html
       classpathref="classpath"  destdir="${build}"
       includes="com/moneydance/modules/features/payslip/**"/>
 
+    <delete file="${dist}/payslip.mxt" />
     <jar destfile="${dist}/payslip.mxt">
       <fileset dir="${src}" includes="
              com/moneydance/modules/features/payslip/meta_info.dict
@@ -49,6 +52,20 @@ http://jakarta.apache.org/ant/index.html
       <fileset dir="${build}" includes="com/moneydance/modules/features/payslip/**"/>
     </jar>
 
+    <antcall target="install" />
+  </target>
+
+  <target name="python" depends="init">
+    <delete file="${dist}/payslip.mxt" />
+
+    <jar destfile="${dist}/payslip.mxt">
+      <fileset dir="${src}/python" includes="*"/>
+    </jar>
+
+    <antcall target="install" />
+  </target>
+
+  <target name="install">
     <java newenvironment="true" 
       classpathref="classpath"
       classname="com.moneydance.admin.KeyAdmin">
@@ -59,6 +76,8 @@ http://jakarta.apache.org/ant/index.html
       <arg line="${dist}/payslip.mxt"/>
     </java>
     <move file="${src}/s-payslip.mxt" tofile="${dist}/payslip.mxt"/>
+    <copy file="${dist}/payslip.mxt" tofile="${install}/payslip.mxt"
+          verbose="true" failonerror="false" />
   </target>
 
   <target name="genkeys">
