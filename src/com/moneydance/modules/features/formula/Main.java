@@ -2,14 +2,13 @@
  *      Copyright (C) 2016 The Infinite Kind, Limited       *
 \************************************************************/
 
-package com.moneydance.modules.features.payslip;
+package com.moneydance.modules.features.formula;
 
 import com.moneydance.apps.md.controller.FeatureModule;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 
 /** Pluggable module used to give users access to a Account List
     interface to Moneydance.
@@ -18,15 +17,15 @@ import java.io.File;
 public class Main
   extends FeatureModule
 {
-  private AccountListWindow accountListWindow = null;
+  private FormulaWindow formulaWindow = null;
 
   public void init() {
     // the first thing we will do is register this module to be invoked
     // via the application toolbar
     FeatureModuleContext context = getContext();
     try {
-      context.registerFeature(this, "showconsole",
-        getIcon("accountlist"),
+      context.registerFeature(this, "open",
+        getIcon("open"),
         getName());
     }
     catch (Exception e) {
@@ -42,7 +41,7 @@ public class Main
     try {
       ClassLoader cl = getClass().getClassLoader();
       java.io.InputStream in = 
-        cl.getResourceAsStream("/com/moneydance/modules/features/payslip/icon.gif");
+        cl.getResourceAsStream("/com/moneydance/modules/features/formula/icon.gif");
       if (in != null) {
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
         byte buf[] = new byte[256];
@@ -71,24 +70,24 @@ public class Main
       }
     }
 
-    if(command.equals("showconsole")) {
-      showConsole();
+    if(command.equals("open")) {
+      showWindow();
     }    
   }
 
   public String getName() {
-    return "Account List";
+    return "Formulas";
   }
 
-  private synchronized void showConsole() {
-    if(accountListWindow==null) {
-      accountListWindow = new AccountListWindow(this);
-      accountListWindow.setVisible(true);
+  private synchronized void showWindow() {
+    if(formulaWindow ==null) {
+      formulaWindow = new FormulaWindow(this);
+      formulaWindow.setVisible(true);
     }
     else {
-      accountListWindow.setVisible(true);
-      accountListWindow.toFront();
-      accountListWindow.requestFocus();
+      formulaWindow.setVisible(true);
+      formulaWindow.toFront();
+      formulaWindow.requestFocus();
     }
   }
   
@@ -97,9 +96,9 @@ public class Main
   }
 
   synchronized void closeConsole() {
-    if(accountListWindow!=null) {
-      accountListWindow.goAway();
-      accountListWindow = null;
+    if(formulaWindow !=null) {
+      formulaWindow.goAway();
+      formulaWindow = null;
       System.gc();
     }
   }

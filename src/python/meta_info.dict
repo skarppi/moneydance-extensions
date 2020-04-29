@@ -1,11 +1,11 @@
 {
   "extension_type" = "python"
-  "id" = "payslip"
+  "id" = "formula"
   "vendor" = "Juho Kolehmainen"
   "module_build" = "1"
   "minbuild" = "1000"
-  "vendor.url" = "https://github.com/skarppi/payslip"
-  "module_name" = "Payslip"
-  "module_desc" = "<html><body><title>Payslip</title><p>Calculate payslip transactions with taxes and bonuses.</p></body></html>"
-  "desc" = "Calculate payslip transactions with taxes and bonuses"
+  "vendor.url" = "https://github.com/skarppi/moneydance-formula"
+  "module_name" = "Moneydance Formula"
+  "module_desc" = "<html><body><title>Moneydance Formula</title><p>Add formulas to Moneydance transaction reminders.</p></body></html>"
+  "desc" = "Add formulas to Moneydance transaction reminders"
 }

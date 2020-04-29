@@ -3,7 +3,7 @@ build file for ant
 http://jakarta.apache.org/ant/index.html
 -->
 
-<project name="payslip" default="all" basedir=".">
+<project name="formula" default="all" basedir=".">
   <property name="version"  value="2.2"/>
   <property name="src" value="."/>
   <property name="build" value="./build"/>
@@ -30,6 +30,7 @@ http://jakarta.apache.org/ant/index.html
   <path id="classpath">
     <pathelement path="../lib/extadmin.jar"/>
     <pathelement path="../lib/moneydance-dev.jar"/>
+    <pathelement path="../lib/jython-standalone-2.7.2.jar"/>
   </path>
 
   <target name="init">
@@ -37,28 +38,28 @@ http://jakarta.apache.org/ant/index.html
     <mkdir dir="${build}"/>
   </target>   
 
-  <target name="payslip" depends="init">
+  <target name="formula" depends="init">
     <javac srcdir="${src}" debug="${debug}" optimize="${optimize}"
-      classpathref="classpath"  destdir="${build}"
-      includes="com/moneydance/modules/features/payslip/**"/>
+           classpathref="classpath"  destdir="${build}"
+           includes="com/moneydance/modules/features/formula/**"/>
 
-    <delete file="${dist}/payslip.mxt" />
-    <jar destfile="${dist}/payslip.mxt">
+    <delete file="${dist}/formula.mxt" />
+    <jar destfile="${dist}/formula.mxt">
       <fileset dir="${src}" includes="
-             com/moneydance/modules/features/payslip/meta_info.dict
-             com/moneydance/modules/features/payslip/*.gif
-             com/moneydance/modules/features/payslip/*.jpg
-             com/moneydance/modules/features/payslip/*.jpeg"/>
-      <fileset dir="${build}" includes="com/moneydance/modules/features/payslip/**"/>
+            com/moneydance/modules/features/formula/meta_info.dict
+            com/moneydance/modules/features/formula/*.gif
+            com/moneydance/modules/features/formula/*.jpg
+            com/moneydance/modules/features/formula/*.jpeg"/>
+      <fileset dir="${build}" includes="com/moneydance/modules/features/formula/**"/>
     </jar>
 
     <antcall target="install" />
   </target>
 
   <target name="python" depends="init">
-    <delete file="${dist}/payslip.mxt" />
+    <delete file="${dist}/formula.mxt" />
 
-    <jar destfile="${dist}/payslip.mxt">
+    <jar destfile="${dist}/formula.mxt">
       <fileset dir="${src}/python" includes="*"/>
     </jar>
 
@@ -72,11 +73,11 @@ http://jakarta.apache.org/ant/index.html
       <arg value="signextjar"/>
       <arg value="${privkeyfile}"/>
       <arg value="${privkeyid}"/>
-      <arg value="payslip"/>
-      <arg line="${dist}/payslip.mxt"/>
+      <arg value="formula"/>
+      <arg line="${dist}/formula.mxt"/>
     </java>
-    <move file="${src}/s-payslip.mxt" tofile="${dist}/payslip.mxt"/>
-    <copy file="${dist}/payslip.mxt" tofile="${install}/payslip.mxt"
+    <move file="${src}/s-formula.mxt" tofile="${dist}/formula.mxt"/>
+    <copy file="${dist}/formula.mxt" tofile="${install}/formula.mxt"
           verbose="true" failonerror="false" />
   </target>
 
@@ -90,6 +91,6 @@ http://jakarta.apache.org/ant/index.html
     </java>
   </target>
 
-  <target name="all" depends="payslip"/>
+  <target name="all" depends="formula"/>
 
 </project>

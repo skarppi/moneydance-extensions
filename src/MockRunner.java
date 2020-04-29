@@ -5,8 +5,8 @@ import com.moneydance.apps.md.controller.FeatureModule;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
 import com.moneydance.apps.md.extensionapi.AccountEditor;
 import com.moneydance.apps.md.view.HomePageView;
-import com.moneydance.modules.features.payslip.AccountListWindow;
-import com.moneydance.modules.features.payslip.Main;
+import com.moneydance.modules.features.formula.FormulaWindow;
+import com.moneydance.modules.features.formula.Main;
 
 import java.awt.*;
 import java.io.File;
@@ -75,7 +75,7 @@ public class MockRunner implements FeatureModuleContext {
             e.printStackTrace();
         }
 
-        AccountListWindow accountListWindow = new AccountListWindow(main);
-        accountListWindow.setVisible(true);
+        FormulaWindow formulaWindow = new FormulaWindow(main);
+        formulaWindow.setVisible(true);
     }
 }

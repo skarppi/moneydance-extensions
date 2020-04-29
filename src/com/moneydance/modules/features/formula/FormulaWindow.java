@@ -2,12 +2,11 @@
  *      Copyright (C) 2016 The Infinite Kind, Limited       *
 \************************************************************/
 
-package com.moneydance.modules.features.payslip;
+package com.moneydance.modules.features.formula;
 
 import com.moneydance.awt.*;
 import com.infinitekind.moneydance.model.*;
 
-import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,18 +14,18 @@ import javax.swing.border.*;
 
 /** Window used for Account List interface */
 
-public class AccountListWindow 
+public class FormulaWindow
   extends JFrame
   implements ActionListener
 {
-  private Main extension;
+  private com.moneydance.modules.features.formula.Main extension;
   private JTextArea accountListArea;
   private JButton clearButton;
   private JButton closeButton;
   private JTextField inputArea;
 
-  public AccountListWindow(Main extension) {
-    super("Account List Console");
+  public FormulaWindow(Main extension) {
+    super("Formulas");
     this.extension = extension;
 
     accountListArea = new JTextArea();
@@ -34,7 +33,7 @@ public class AccountListWindow
     AccountBook book = extension.getUnprotectedContext().getCurrentAccountBook();
     StringBuffer acctStr = new StringBuffer();
     if(book !=null) {
-      addSubAccounts(book.getRootAccount(), acctStr);
+      addReminders(book.getRootAccount(), acctStr);
     }
     accountListArea.setEditable(false);
     accountListArea.setText(acctStr.toString());
@@ -56,19 +55,17 @@ public class AccountListWindow
     closeButton.addActionListener(this);
     clearButton.addActionListener(this);
         
-    PrintStream c = new PrintStream(new ConsoleStream());
-
     setSize(500, 400);
     AwtUtil.centerWindow(this);
   }
 
-  public static void addSubAccounts(Account parentAcct, StringBuffer acctStr) {
+  public static void addReminders(Account parentAcct, StringBuffer acctStr) {
     int sz = parentAcct.getSubAccountCount();
     for(int i=0; i<sz; i++) {
       Account acct = parentAcct.getSubAccount(i);
       acctStr.append(acct.getFullAccountName());
       acctStr.append("\n");
-      addSubAccounts(acct, acctStr);
+      addReminders(acct, acctStr);
     }
   }
 
@@ -91,28 +88,6 @@ public class AccountListWindow
     if(evt.getID()==WindowEvent.WINDOW_OPENED) {
     }
     super.processEvent(evt);
-  }
-  
-  private class ConsoleStream
-    extends OutputStream
-    implements Runnable
-  {    
-    public void write(int b)
-      throws IOException
-    {
-      accountListArea.append(String.valueOf((char)b));
-      repaint();
-    }
-
-    public void write(byte[] b)
-      throws IOException
-    {
-      accountListArea.append(new String(b));
-      repaint();
-    }
-    public void run() {
-      accountListArea.repaint();
-    }
   }
 
   void goAway() {

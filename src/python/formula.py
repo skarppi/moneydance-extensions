@@ -9,11 +9,11 @@ import MockRunner
 from com.infinitekind.moneydance.model import AccountUtil
 from javax.swing import JButton, JFrame, JScrollPane, JTextArea, BoxLayout, BorderFactory
 
-class PayslipExtension(object):
+class FormulaExtension(object):
 
     moneydanceContext = None
     moneydanceExtensionObject = None
-    name = "Payslip"
+    name = "Formula"
 
     # The initialize method is called when the extension is loaded and provides the
     # extension's context.  The context implements the methods defined in the FeatureModuleContext:
@@ -24,7 +24,7 @@ class PayslipExtension(object):
 
         # here we register ourselves with a menu item to invoke a feature
         # (ignore the button and icon mentions in the docs)
-        self.moneydanceContext.registerFeature(extension_object, "open", None, "Payslip")
+        self.moneydanceContext.registerFeature(extension_object, "open", None, "Formula")
 
     # invoke(eventstring) is called when we receive a callback for the feature that
     # we registered in the initialize method
@@ -69,7 +69,7 @@ class PayslipExtension(object):
 
 
 # Tell moneydance this is an extension
-moneydance_extension = PayslipExtension()
+moneydance_extension = FormulaExtension()
 
 # Local debugging
 if  __name__ == '__main__':
