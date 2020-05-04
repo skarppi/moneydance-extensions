@@ -3,11 +3,8 @@ package com.moneydance.modules.features.formula;
 import com.infinitekind.moneydance.model.AccountBook;
 import com.infinitekind.moneydance.model.Reminder;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
-import com.moneydance.apps.md.controller.Main;
-import com.moneydance.apps.md.view.gui.MDImages;
 import com.moneydance.apps.md.view.gui.MoneydanceGUI;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -36,21 +33,16 @@ public class MDApi {
     }
 
     public static void enableReminder(Reminder reminder) {
-//            reminder.setDescription(reminder.getDescription() + "1");
         reminder.setParameter(MDApi.ENABLED_KEY, true);
+        reminder.syncItem();
+    }
+
+    public static void disableReminder(Reminder reminder) {
+        reminder.removeParameter(MDApi.ENABLED_KEY);
         reminder.syncItem();
     }
 
     public MoneydanceGUI getGUI() {
         return gui.get();
-    }
-
-    public Icon getIcon(String path) {
-        if (context instanceof com.moneydance.apps.md.controller.Main) {
-            MoneydanceGUI ui = (MoneydanceGUI) ((Main) context).getUI();
-            return ui.getIcon(path);
-        } else {
-            return MDImages.getMDIcon(path);
-        }
     }
 }

@@ -48,7 +48,7 @@ public class FormulaWindow
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     enableEvents(WindowEvent.WINDOW_CLOSING);
 
-    setSize(500, 400);
+    setSize(700, 500);
     AwtUtil.centerWindow(this);
   }
 

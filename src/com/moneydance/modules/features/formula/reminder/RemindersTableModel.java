@@ -27,6 +27,13 @@ public class RemindersTableModel extends AbstractTableModel {
         return insertIndex;
     }
 
+    void remove(int index) {
+        Reminder removed = reminders.remove(index);
+        MDApi.disableReminder(removed);
+
+        fireTableRowsDeleted(index, index);
+    }
+
     @Override
     public int getRowCount() {
         return reminders.size();
