@@ -6,6 +6,7 @@ package com.moneydance.modules.features.formula;
 
 import com.moneydance.apps.md.controller.FeatureModule;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
+import com.moneydance.apps.md.view.gui.MoneydanceGUI;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,9 @@ public class Main
 {
   private FormulaWindow formulaWindow = null;
 
+  private MDApi model;
+
+  @Override
   public void init() {
     // the first thing we will do is register this module to be invoked
     // via the application toolbar
@@ -31,8 +35,14 @@ public class Main
     catch (Exception e) {
       e.printStackTrace(System.err);
     }
+
+
+
+    model = new MDApi(context,
+            () -> (MoneydanceGUI) ((com.moneydance.apps.md.controller.Main) context).getUI());
   }
 
+  @Override
   public void cleanup() {
     closeConsole();
   }
@@ -80,8 +90,8 @@ public class Main
   }
 
   private synchronized void showWindow() {
-    if(formulaWindow ==null) {
-      formulaWindow = new FormulaWindow(this);
+    if(formulaWindow == null) {
+      formulaWindow = new FormulaWindow(model);
       formulaWindow.setVisible(true);
     }
     else {
@@ -90,7 +100,7 @@ public class Main
       formulaWindow.requestFocus();
     }
   }
-  
+
   FeatureModuleContext getUnprotectedContext() {
     return getContext();
   }

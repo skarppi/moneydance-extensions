@@ -4,85 +4,57 @@
 
 package com.moneydance.modules.features.formula;
 
-import com.moneydance.awt.*;
-import com.infinitekind.moneydance.model.*;
+import com.moneydance.apps.md.view.gui.OKButtonListener;
+import com.moneydance.apps.md.view.gui.OKButtonPanel;
+import com.moneydance.awt.AwtUtil;
+import com.moneydance.awt.GridC;
+import com.moneydance.modules.features.formula.reminder.ReminderDetails;
+import com.moneydance.modules.features.formula.reminder.ReminderList;
+import com.moneydance.util.UiUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.border.*;
+import java.awt.event.WindowEvent;
 
 /** Window used for Account List interface */
 
 public class FormulaWindow
   extends JFrame
-  implements ActionListener
+  implements OKButtonListener
 {
-  private com.moneydance.modules.features.formula.Main extension;
-  private JTextArea accountListArea;
-  private JButton clearButton;
-  private JButton closeButton;
-  private JTextField inputArea;
-
-  public FormulaWindow(Main extension) {
+  public FormulaWindow(MDApi api) {
     super("Formulas");
-    this.extension = extension;
 
-    accountListArea = new JTextArea();
-    
-    AccountBook book = extension.getUnprotectedContext().getCurrentAccountBook();
-    StringBuffer acctStr = new StringBuffer();
-    if(book !=null) {
-      addReminders(book.getRootAccount(), acctStr);
-    }
-    accountListArea.setEditable(false);
-    accountListArea.setText(acctStr.toString());
-    inputArea = new JTextField();
-    inputArea.setEditable(true);
-    clearButton = new JButton("Clear");
-    closeButton = new JButton("Close");
+    ReminderDetails reminderDetails = new ReminderDetails(api);
+
+    ReminderList reminderList = new ReminderList(api);
+    reminderList.addSelectionListener(reminder ->
+      reminderDetails.setReminder(reminder)
+    );
 
     JPanel p = new JPanel(new GridBagLayout());
-    p.setBorder(new EmptyBorder(10,10,10,10));
-    p.add(new JScrollPane(accountListArea), AwtUtil.getConstraints(0,0,1,1,4,1,true,true));
-    p.add(Box.createVerticalStrut(8), AwtUtil.getConstraints(0,2,0,0,1,1,false,false));
-    p.add(clearButton, AwtUtil.getConstraints(0,3,1,0,1,1,false,true));
-    p.add(closeButton, AwtUtil.getConstraints(1,3,1,0,1,1,false,true));
+    p.setBorder(BorderFactory.createEmptyBorder(UiUtil.DLG_VGAP, UiUtil.DLG_HGAP,
+            UiUtil.DLG_VGAP, UiUtil.DLG_HGAP));
+    p.add(reminderList, GridC.getc(0, 0).wxy(1, 1).fillboth());
+
+    p.add(reminderDetails, GridC.getc(0,1).wxy(1, 1).fillboth());
+
+    p.add(Box.createVerticalStrut(UiUtil.DLG_VGAP), GridC.getc(0,2));
+
+    final OKButtonPanel okPanel = new OKButtonPanel(api.getGUI(), this, OKButtonPanel.QUESTION_OK_CANCEL);
+    p.add(okPanel, GridC.getc(0,3).east());
     getContentPane().add(p);
 
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     enableEvents(WindowEvent.WINDOW_CLOSING);
-    closeButton.addActionListener(this);
-    clearButton.addActionListener(this);
-        
+
     setSize(500, 400);
     AwtUtil.centerWindow(this);
   }
 
-  public static void addReminders(Account parentAcct, StringBuffer acctStr) {
-    int sz = parentAcct.getSubAccountCount();
-    for(int i=0; i<sz; i++) {
-      Account acct = parentAcct.getSubAccount(i);
-      acctStr.append(acct.getFullAccountName());
-      acctStr.append("\n");
-      addReminders(acct, acctStr);
-    }
-  }
-
-
-  public void actionPerformed(ActionEvent evt) {
-    Object src = evt.getSource();
-    if(src==closeButton) {
-      extension.closeConsole();
-    }
-    if(src==clearButton) {
-      accountListArea.setText("");
-    }
-  }
-
   public final void processEvent(AWTEvent evt) {
     if(evt.getID()==WindowEvent.WINDOW_CLOSING) {
-      extension.closeConsole();
+      goAway();
       return;
     }
     if(evt.getID()==WindowEvent.WINDOW_OPENED) {
@@ -93,5 +65,14 @@ public class FormulaWindow
   void goAway() {
     setVisible(false);
     dispose();
+  }
+
+  @Override
+  public void buttonPressed(int buttonId) {
+    if (buttonId == OKButtonPanel.ANSWER_CANCEL) {
+      goAway();
+    } else if (buttonId == OKButtonPanel.ANSWER_OK) {
+      goAway();
+    }
   }
 }

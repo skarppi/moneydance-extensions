@@ -3,14 +3,15 @@ import com.infinitekind.moneydance.model.AccountBook;
 import com.moneydance.apps.md.controller.AccountBookWrapper;
 import com.moneydance.apps.md.controller.FeatureModule;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
+import com.moneydance.apps.md.controller.Main;
 import com.moneydance.apps.md.extensionapi.AccountEditor;
 import com.moneydance.apps.md.view.HomePageView;
+import com.moneydance.apps.md.view.gui.MoneydanceGUI;
 import com.moneydance.modules.features.formula.FormulaWindow;
-import com.moneydance.modules.features.formula.Main;
+import com.moneydance.modules.features.formula.MDApi;
 
 import java.awt.*;
 import java.io.File;
-import java.lang.reflect.Field;
 
 public class MockRunner implements FeatureModuleContext {
 
@@ -63,19 +64,13 @@ public class MockRunner implements FeatureModuleContext {
     }
 
     public static void main(String[] args) throws Exception {
-        Main main = new Main();
-
         FeatureModuleContext context = new MockRunner(new File("Test.moneydance"));
 
-        try {
-            Field contextField = FeatureModule.class.getDeclaredField("context");
-            contextField.setAccessible(true);
-            contextField.set(main, context);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Main main = new Main();
+        main.initializeApp();
 
-        FormulaWindow formulaWindow = new FormulaWindow(main);
+        MDApi api = new MDApi(context, () -> new MoneydanceGUI(main));
+        FormulaWindow formulaWindow = new FormulaWindow(api);
         formulaWindow.setVisible(true);
     }
 }
