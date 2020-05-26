@@ -36,8 +36,6 @@ public class Main
       e.printStackTrace(System.err);
     }
 
-
-
     model = new MDApi(context,
             () -> (MoneydanceGUI) ((com.moneydance.apps.md.controller.Main) context).getUI());
   }

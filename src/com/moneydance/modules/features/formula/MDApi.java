@@ -1,8 +1,10 @@
 package com.moneydance.modules.features.formula;
 
 import com.infinitekind.moneydance.model.AccountBook;
+import com.infinitekind.moneydance.model.CurrencyType;
 import com.infinitekind.moneydance.model.Reminder;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
+import com.moneydance.apps.md.controller.UserPreferences;
 import com.moneydance.apps.md.view.gui.MoneydanceGUI;
 
 import java.util.List;
@@ -40,6 +42,15 @@ public class MDApi {
     public static void disableReminder(Reminder reminder) {
         reminder.removeParameter(MDApi.ENABLED_KEY);
         reminder.syncItem();
+    }
+
+    public CurrencyType getBaseCurrency() {
+        return getBook().getCurrencies().getBaseType();
+    }
+
+    public String formatCurrency(long value) {
+        char decimalChar = UserPreferences.getInstance().getDecimalChar();
+        return getBaseCurrency().formatFancy(value, decimalChar);
     }
 
     public MoneydanceGUI getGUI() {
