@@ -41,7 +41,7 @@ public class FormulaWindow
 
     p.add(Box.createVerticalStrut(UiUtil.DLG_VGAP), GridC.getc(0,2));
 
-    final OKButtonPanel okPanel = new OKButtonPanel(api.getGUI(), this, OKButtonPanel.QUESTION_OK_CANCEL);
+    final OKButtonPanel okPanel = new OKButtonPanel(api.getGUI(), this, OKButtonPanel.QUESTION_OK);
     p.add(okPanel, GridC.getc(0,3).east());
     getContentPane().add(p);
 
@@ -69,10 +69,6 @@ public class FormulaWindow
 
   @Override
   public void buttonPressed(int buttonId) {
-    if (buttonId == OKButtonPanel.ANSWER_CANCEL) {
-      goAway();
-    } else if (buttonId == OKButtonPanel.ANSWER_OK) {
-      goAway();
-    }
+    goAway();
   }
 }
