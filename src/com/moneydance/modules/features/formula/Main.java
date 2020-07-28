@@ -93,6 +93,7 @@ public class Main
       formulaWindow.setVisible(true);
     }
     else {
+      formulaWindow.reload();
       formulaWindow.setVisible(true);
       formulaWindow.toFront();
       formulaWindow.requestFocus();

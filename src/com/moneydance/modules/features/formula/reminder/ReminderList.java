@@ -19,8 +19,11 @@ public class ReminderList extends JPanel {
     private MDApi api;
 
     public ReminderList(MDApi api) {
-        tableModel = new RemindersTableModel(api.getReminders(true));
         this.api = api;
+
+        tableModel = new RemindersTableModel();
+        reload();
+
         reminderTable = new JTable(tableModel);
         getSelection().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -34,6 +37,10 @@ public class ReminderList extends JPanel {
 
         add(new JScrollPane(reminderTable), BorderLayout.CENTER);
         add(buildButtonPanel(api), BorderLayout.SOUTH);
+    }
+
+    public void reload() {
+        tableModel.setReminders(api.getReminders(true));
     }
 
     private ListSelectionModel getSelection() {

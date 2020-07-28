@@ -74,11 +74,12 @@ public class ReminderDetails extends JPanel {
 
     public void setReminder(Reminder reminder) {
         this.reminder = reminder;
-        parentTxn = reminder.getTransaction();
+        parentTxn = reminder != null ? reminder.getTransaction() : null;
 
-        tableModel.transactions = IntStream.range(0, parentTxn.getSplitCount())
+        tableModel.transactions = IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
                 .mapToObj(i -> new FormulaTxn(parentTxn.getSplit(i)))
                 .collect(Collectors.toList());
+
         tableModel.fireTableDataChanged();
 
         summaryLabel.setText(summaryText());

@@ -2,18 +2,21 @@ package com.moneydance.modules.features.formula.reminder;
 
 import com.infinitekind.moneydance.model.Reminder;
 import com.moneydance.modules.features.formula.MDApi;
+import lombok.Setter;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RemindersTableModel extends AbstractTableModel {
 
     private final Reminder NEW_ENTRY = new Reminder(null);
 
-    private List<Reminder> reminders;
+    private List<Reminder> reminders = new ArrayList<>();
 
-    public RemindersTableModel(List<Reminder> reminders) {
+    public void setReminders(List<Reminder> reminders) {
         this.reminders = reminders;
+        fireTableDataChanged();
     }
 
     Reminder getReminder(int index) {

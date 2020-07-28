@@ -22,12 +22,14 @@ public class FormulaWindow
   extends JFrame
   implements OKButtonListener
 {
+  private ReminderList reminderList;
+
   public FormulaWindow(MDApi api) {
     super("Formulas");
 
     ReminderDetails reminderDetails = new ReminderDetails(api);
 
-    ReminderList reminderList = new ReminderList(api);
+    reminderList = new ReminderList(api);
     reminderList.addSelectionListener(reminder ->
       reminderDetails.setReminder(reminder)
     );
@@ -50,6 +52,10 @@ public class FormulaWindow
 
     setSize(700, 500);
     AwtUtil.centerWindow(this);
+  }
+
+  public void reload() {
+    reminderList.reload();
   }
 
   public final void processEvent(AWTEvent evt) {
