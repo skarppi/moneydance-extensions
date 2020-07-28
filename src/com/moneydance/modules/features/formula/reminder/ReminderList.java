@@ -15,13 +15,16 @@ public class ReminderList extends JPanel {
 
     private RemindersTableModel tableModel;
     private JTable reminderTable;
+    private DefaultComboBoxModel<Reminder> comboBoxModel = new DefaultComboBoxModel<>();
+    private MDApi api;
 
     public ReminderList(MDApi api) {
         tableModel = new RemindersTableModel(api.getReminders(true));
+        this.api = api;
         reminderTable = new JTable(tableModel);
         getSelection().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        JComboBox boxSelect = new JComboBox(api.getReminders(false).toArray());
+        JComboBox boxSelect = new JComboBox(comboBoxModel);
         reminderTable.getColumnModel().getColumn(0)
                 .setCellEditor(new DefaultCellEditor(boxSelect));
 
@@ -51,8 +54,13 @@ public class ReminderList extends JPanel {
         MDAction addAction = MDAction.makeIconAction(gui,
                 gui.getIcon(MDImages.PLUS),
                 evt -> {
-                    int index = tableModel.insert();
-                    getSelection().setSelectionInterval(index,index);
+                    comboBoxModel.removeAllElements();
+                    comboBoxModel.addAll(api.getReminders(false));
+
+                    if (comboBoxModel.getSize() > 0) {
+                        int index = tableModel.insert();
+                        getSelection().setSelectionInterval(index,index);
+                    }
                 });
 
         MDAction removeAction = MDAction.makeIconAction(gui,
