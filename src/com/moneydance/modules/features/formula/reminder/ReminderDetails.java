@@ -90,9 +90,9 @@ public class ReminderDetails extends JPanel {
             FormulaTxn formulaTxn = tableModel.transactions.get(i);
             formulaTxn.syncSettings();
         }
-        tableModel.fireTableRowsUpdated(0, parentTxn.getSplitCount());
-
         reminder.syncItem();
+
+        tableModel.fireTableRowsUpdated(0, parentTxn.getSplitCount());
     }
 
     public void recordTransaction() {
@@ -114,7 +114,6 @@ public class ReminderDetails extends JPanel {
         }
 
         txns.addNewTxn(newTxn);
-        book.refreshAccountBalances();
 
         reminder.setAcknowledgedInt(date);
         reminder.syncItem();

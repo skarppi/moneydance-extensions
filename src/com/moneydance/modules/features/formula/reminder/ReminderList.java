@@ -21,7 +21,7 @@ public class ReminderList extends JPanel {
     public ReminderList(MDApi api) {
         this.api = api;
 
-        tableModel = new RemindersTableModel();
+        tableModel = new RemindersTableModel(api);
         reload();
 
         reminderTable = new JTable(tableModel);

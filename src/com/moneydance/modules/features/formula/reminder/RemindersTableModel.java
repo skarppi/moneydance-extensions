@@ -1,8 +1,8 @@
 package com.moneydance.modules.features.formula.reminder;
 
 import com.infinitekind.moneydance.model.Reminder;
+import com.infinitekind.util.CustomDateFormat;
 import com.moneydance.modules.features.formula.MDApi;
-import lombok.Setter;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -13,6 +13,12 @@ public class RemindersTableModel extends AbstractTableModel {
     private final Reminder NEW_ENTRY = new Reminder(null);
 
     private List<Reminder> reminders = new ArrayList<>();
+
+    private CustomDateFormat dateFormat;
+
+    public RemindersTableModel(MDApi api) {
+        dateFormat = api.getShortDateFormatter();
+    }
 
     public void setReminders(List<Reminder> reminders) {
         this.reminders = reminders;
@@ -62,7 +68,7 @@ public class RemindersTableModel extends AbstractTableModel {
         Reminder reminder = reminders.get(rowIndex);
         switch (columnIndex) {
             case 1:
-                return reminder.getNextOccurance(29991231);
+                return dateFormat.format(reminder.getNextOccurance(29991231));
             default:
                 return reminder.getDescription();
         }

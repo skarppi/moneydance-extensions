@@ -3,6 +3,7 @@ package com.moneydance.modules.features.formula;
 import com.infinitekind.moneydance.model.AccountBook;
 import com.infinitekind.moneydance.model.CurrencyType;
 import com.infinitekind.moneydance.model.Reminder;
+import com.infinitekind.util.CustomDateFormat;
 import com.moneydance.apps.md.controller.FeatureModuleContext;
 import com.moneydance.apps.md.controller.UserPreferences;
 import com.moneydance.apps.md.view.gui.MoneydanceGUI;
@@ -55,5 +56,9 @@ public class MDApi {
 
     public MoneydanceGUI getGUI() {
         return gui.get();
+    }
+
+    public CustomDateFormat getShortDateFormatter() {
+        return getGUI().getPreferences().getShortDateFormatter();
     }
 }
