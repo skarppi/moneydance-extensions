@@ -1,18 +1,15 @@
 package com.moneydance.modules.features.formula.reminder;
 
-import com.bulenkov.iconloader.util.UIUtil;
 import com.infinitekind.moneydance.model.*;
 import com.moneydance.apps.md.view.gui.EditRemindersWindow;
 import com.moneydance.apps.md.view.gui.MDAction;
-import com.moneydance.apps.md.view.gui.MDImages;
 import com.moneydance.awt.GridC;
 import com.moneydance.modules.features.formula.MDApi;
 import com.moneydance.util.UiUtil;
 import lombok.Data;
-import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -44,7 +41,6 @@ public class ReminderDetails extends JPanel {
         tableModel = new TxTableModel();
 
         txTable = new JTable(tableModel);
-        txTable.setRowHeight(UIUtil.getListBackground());
 
         setLayout(new BorderLayout(UiUtil.DLG_HGAP, UiUtil.DLG_VGAP));
         setBorder(BorderFactory.createEmptyBorder(UiUtil.VGAP, UiUtil.HGAP,
@@ -59,13 +55,13 @@ public class ReminderDetails extends JPanel {
         MDAction recordAction = MDAction.makeNonKeyedAction(null,
                 "Record Transaction",
                 "R",
-                evt -> EditRemindersWindow.editReminder(null, mdApi.getGUI(), reminder)
+                evt -> recordTransaction()
         );
 
         MDAction saveAction = MDAction.makeNonKeyedAction(null,
                 "Store parameters as default",
                 "R",
-                evt -> reminder.getTransaction().syncItem()
+                evt -> storeSettings()
         );
 
         setLayout(new GridBagLayout());
@@ -88,8 +84,39 @@ public class ReminderDetails extends JPanel {
         summaryLabel.setText(summaryText());
     }
 
-    public void storeParameters() {
+    public void storeSettings() {
+        for(int i=0; i < parentTxn.getSplitCount(); i++) {
+            FormulaTxn formulaTxn = tableModel.transactions.get(i);
+            formulaTxn.syncSettings();
+        }
+        tableModel.fireTableRowsUpdated(0, parentTxn.getSplitCount());
 
+        reminder.syncItem();
+    }
+
+    public void recordTransaction() {
+        AccountBook book = api.getBook();
+        TransactionSet txns = book.getTransactionSet();
+
+        int date = reminder.getNextOccurance(29991231);
+
+        ParentTxn newTxn = parentTxn.duplicateAsNew();
+        newTxn.setDateInt(date);
+        newTxn.setTaxDateInt(date);
+        newTxn.setDateEntered(System.currentTimeMillis());
+
+        for(int i=0; i < newTxn.getSplitCount(); i++) {
+            FormulaTxn formulaTxn = tableModel.transactions.get(i);
+            SplitTxn split = newTxn.getSplit(i);
+            split.setAmount(formulaTxn.getAmount());
+            split.setDescription(formulaTxn.getDescription());
+        }
+
+        txns.addNewTxn(newTxn);
+        book.refreshAccountBalances();
+
+        reminder.setAcknowledgedInt(date);
+        reminder.syncItem();
     }
 
     private String summaryText() {
@@ -119,6 +146,10 @@ public class ReminderDetails extends JPanel {
         public FormulaTxn(SplitTxn txn) {
             this.txn = txn;
 
+            readSettings();
+        }
+
+        private void readSettings() {
             paymentValue = txn.getValue() >= 0 ? txn.getValue() : 0;
             depositValue = txn.getValue() < 0 ? -txn.getValue() : 0;
 
@@ -126,15 +157,33 @@ public class ReminderDetails extends JPanel {
             B = txn.getParameter("formula_b");
         }
 
+        public void syncSettings() {
+            long value = getAmount();
+            txn.setAmount(value, value);
+            txn.setParameter("formula_a", A);
+            txn.setParameter("formula_b", B);
+
+            readSettings();
+        }
+
+        private String formula() {
+            if (StringUtils.isNoneBlank(A)  && StringUtils.isNoneBlank(B)) {
+                return String.format("(%s)*(%s)", A, B);
+            } else if (StringUtils.isNoneBlank(A)) {
+                return A;
+            } else if (StringUtils.isNoneBlank(B)) {
+                return B;
+            } else {
+                return null;
+            }
+        }
+
         public long calculate(long defaultValue) {
             try {
-                Object value = null;
-                if (A != null && B != null) {
-                    value = engine.eval(String.format("(%s)*(%s)", A, B));
-                } else if (A != null) {
-                    value = engine.eval(A);
-                } else if (B != null) {
-                    value = engine.eval(B);
+                String formula = formula();
+                Object value;
+                if (formula != null) {
+                    value = engine.eval(formula);
                 } else {
                     return defaultValue;
                 }
@@ -151,6 +200,27 @@ public class ReminderDetails extends JPanel {
                     return 0;
                 }
             } catch (Exception e) {
+                return 0;
+            }
+        }
+
+        public String getDescription() {
+            String description = txn.getDescription();
+            String formula = formula();
+            if (formula != null) {
+                description += " ("
+                        + formula.replace("(", "").replace(")", "")
+                        + " )";
+            }
+            return description;
+        }
+
+        public long getAmount() {
+            if (paymentValue > 0) {
+                return calculate(paymentValue);
+            } else if (depositValue > 0) {
+                return calculate(depositValue);
+            } else {
                 return 0;
             }
         }
@@ -188,12 +258,10 @@ public class ReminderDetails extends JPanel {
 
         public void setA(String value) {
             A = value;
-            txn.setParameter("formula_a", value);
         }
 
         public void setB(String value) {
             B = value;
-            txn.setParameter("formula_b", value);
         }
     }
 
@@ -269,9 +337,6 @@ public class ReminderDetails extends JPanel {
             } else if (columnIndex == 3) {
                 txn.setB(value);
             }
-
-//            reminder.setDescription(reminder.getDescription() + "1");
-//            transaction.syncItem();
 
             transactions.set(rowIndex, txn);
 

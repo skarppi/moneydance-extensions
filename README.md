@@ -11,6 +11,7 @@ documentation which is available at [developer site](https://infinitekind.com/de
 
 * Use java version 11 at least
 * Add `extadmin.jar` and `moneydance-dev.jar` from the devkit to the lib folder
+* Copy `/Applications/Moneydance.app/Contents/Java/moneydance.jar` to `lib/moneydance-private.jar`.
 
 ## Usage
 

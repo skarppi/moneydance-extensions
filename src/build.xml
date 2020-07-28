@@ -28,9 +28,12 @@ http://jakarta.apache.org/ant/index.html
   <property name="ant.build.javac.source" value="11"/>
   
   <path id="classpath">
+    <pathelement path="../lib/lombok.jar"/>
     <pathelement path="../lib/extadmin.jar"/>
     <pathelement path="../lib/moneydance-dev.jar"/>
     <pathelement path="../lib/jython-standalone-2.7.2.jar"/>
+    <pathelement path="../lib/commons-lang3-3.5.jar"/>
+    <pathelement path="../lib/moneydance-private.jar"/>
   </path>
 
   <target name="init">

@@ -21,7 +21,7 @@ public class MockRunner {
         Main main = new Main();
         main.initializeApp();
 
-        AccountBookWrapper wrapper = AccountBookWrapper.wrapperForFolder(new File("./Test.moneydance"));
+        AccountBookWrapper wrapper = AccountBookWrapper.wrapperForFolder(new File("./Mock.moneydance"));
         wrapper.loadDataModel(null);
 
 //        main.setCurrentBook();

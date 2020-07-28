@@ -10,3 +10,4 @@ out/
 src/build
 dist
 .jython_cache
+lib/moneydance-private.jar
