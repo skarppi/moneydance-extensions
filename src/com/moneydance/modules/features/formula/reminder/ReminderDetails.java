@@ -6,16 +6,9 @@ import com.moneydance.apps.md.view.gui.MDAction;
 import com.moneydance.awt.GridC;
 import com.moneydance.modules.features.formula.MDApi;
 import com.moneydance.util.UiUtil;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,18 +20,16 @@ public class ReminderDetails extends JPanel {
 
     private ParentTxn parentTxn;
 
-    private TxTableModel tableModel;
+    private SplitTxnTableModel tableModel;
 
     private JTable txTable;
 
     private JLabel summaryLabel;
 
-    private ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("py");
-
     public ReminderDetails(MDApi mdApi) {
         api = mdApi;
 
-        tableModel = new TxTableModel();
+        tableModel = new SplitTxnTableModel();
 
         txTable = new JTable(tableModel);
 
@@ -76,18 +67,16 @@ public class ReminderDetails extends JPanel {
         this.reminder = reminder;
         parentTxn = reminder != null ? reminder.getTransaction() : null;
 
-        tableModel.transactions = IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
+        tableModel.setTransactions(IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
                 .mapToObj(i -> new FormulaTxn(parentTxn.getSplit(i)))
-                .collect(Collectors.toList());
-
-        tableModel.fireTableDataChanged();
+                .collect(Collectors.toList()));
 
         summaryLabel.setText(summaryText());
     }
 
     public void storeSettings() {
         for(int i=0; i < parentTxn.getSplitCount(); i++) {
-            FormulaTxn formulaTxn = tableModel.transactions.get(i);
+            FormulaTxn formulaTxn = tableModel.getTransactions().get(i);
             formulaTxn.syncSettings();
         }
         reminder.syncItem();
@@ -96,8 +85,7 @@ public class ReminderDetails extends JPanel {
     }
 
     public void recordTransaction() {
-        AccountBook book = api.getBook();
-        TransactionSet txns = book.getTransactionSet();
+        TransactionSet txns = api.getBook().getTransactionSet();
 
         int date = reminder.getNextOccurance(29991231);
 
@@ -107,7 +95,7 @@ public class ReminderDetails extends JPanel {
         newTxn.setDateEntered(System.currentTimeMillis());
 
         for(int i=0; i < newTxn.getSplitCount(); i++) {
-            FormulaTxn formulaTxn = tableModel.transactions.get(i);
+            FormulaTxn formulaTxn = tableModel.getTransactions().get(i);
             SplitTxn split = newTxn.getSplit(i);
             split.setAmount(formulaTxn.calculateAmount());
             split.setDescription(formulaTxn.getDescription());
@@ -122,8 +110,8 @@ public class ReminderDetails extends JPanel {
     private String summaryText() {
         long value = parentTxn != null ? parentTxn.getValue() : 0;
         return String.format("Payment: %s  Deposit: %s",
-                api.formatCurrency(value < 0 ? -value : 0),
-                api.formatCurrency(value > 0 ? value : 0));
+                MDApi.formatCurrency(value < 0 ? -value : 0),
+                MDApi.formatCurrency(value > 0 ? value : 0));
     }
 
     private JPanel summaryPanel() {
@@ -132,210 +120,5 @@ public class ReminderDetails extends JPanel {
         final JPanel panel = new JPanel(new GridBagLayout());
         panel.add(summaryLabel, GridC.getc(0, 0).fillboth().east());
         return panel;
-    }
-
-    @Data
-    private class FormulaTxn {
-        private SplitTxn txn;
-        private String A;
-        private String B;
-
-        public FormulaTxn(SplitTxn txn) {
-            this.txn = txn;
-
-            readSettings();
-        }
-
-        private void readSettings() {
-            A = txn.getParameter("formula_a");
-            B = txn.getParameter("formula_b");
-        }
-
-        public void syncSettings() {
-            long value = calculateAmount();
-            txn.setAmount(value, value);
-            txn.setParameter("formula_a", A);
-            txn.setParameter("formula_b", B);
-
-            readSettings();
-        }
-
-        private String replacePercent(String formula) {
-            return formula.replace("%", "/100.0");
-        }
-
-        private String formula() {
-            if (StringUtils.isNoneBlank(A)  && StringUtils.isNoneBlank(B)) {
-                return replacePercent(String.format("(%s)*(%s)", A, B));
-            } else if (StringUtils.isNoneBlank(A)) {
-                return replacePercent(A);
-            } else if (StringUtils.isNoneBlank(B)) {
-                return replacePercent(B);
-            } else {
-                return null;
-            }
-        }
-
-        public Long calculateAmount() {
-            String formula = formula();
-            try {
-                Object value;
-                if (formula != null) {
-                    value = engine.eval(formula);
-                } else {
-                    return txn.getValue();
-                }
-
-                if (value instanceof Double) {
-                    return Math.round(100 * (Double) value);
-                } else if (value instanceof Float) {
-                    return (long) Math.round(100 * (Float) value);
-                } else if (value instanceof Long) {
-                    return 100 * (Long)value;
-                } else if (value instanceof Integer) {
-                    return (long) (100 * (Integer) value);
-                } else {
-                    MDApi.log("Unknown value type " + (value != null ? value.getClass() : null));
-                    return null;
-                }
-            } catch (Exception e) {
-                MDApi.log("Failed to evaluate formula " + formula, e);
-                return null;
-            }
-        }
-
-        public String getDescription() {
-            String description = txn.getDescription();
-            String formula = formula();
-            if (formula != null) {
-                description += " ("
-                        + formula.replace("(", "").replace(")", "")
-                        + " )";
-            }
-            return description;
-        }
-
-        private String format(Long value) {
-            if (value == null) {
-                return "N/A";
-            }
-
-            long defaultValue = txn.getValue();
-
-            if (value < 0) {
-                // render values as positive
-                value *= -1;
-                defaultValue *= -1;
-            }
-
-            if (value != defaultValue) {
-                return String.format("%s (was %s)",
-                        api.formatCurrency(value),
-                        api.formatCurrency(defaultValue));
-            } else {
-                return api.formatCurrency(value);
-            }
-        }
-
-        public String formatPayment() {
-            Long value = calculateAmount();
-            return value >= 0 ? format(value) : "N/A";
-        }
-
-        public String formatDeposit() {
-            Long value = calculateAmount();
-            return value < 0 ? format(value) : "N/A";
-        }
-
-        public String toString() {
-            return txn.getDescription();
-        }
-
-        public void setA(String value) {
-            A = value;
-        }
-
-        public void setB(String value) {
-            B = value;
-        }
-    }
-
-    private class TxTableModel extends AbstractTableModel {
-
-        private List<FormulaTxn> transactions = new ArrayList<>();
-
-        @Override
-        public int getRowCount() {
-            return transactions.size();
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 6;
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            switch (column) {
-                case 1:
-                    return "Category";
-                case 2:
-                    return "A";
-                case 3:
-                    return "B";
-                case 4:
-                    return "Payment";
-                case 5:
-                    return "Deposit";
-                default :
-                    return "Name";
-            }
-        }
-
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            FormulaTxn f = transactions.get(rowIndex);
-
-            switch (columnIndex) {
-                case 1:
-                    return f.getTxn().getAccount().getFullAccountName();
-                case 2:
-                    return f.A;
-                case 3:
-                    return f.B;
-                case 4:
-                    return f.formatPayment();
-                case 5:
-                    return f.formatDeposit();
-                default :
-                    return f.toString();
-            }
-        }
-
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return 2 <= columnIndex && columnIndex <= 3;
-        }
-
-        @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if (!isCellEditable(rowIndex, columnIndex)) {
-                return;
-            }
-
-            String value = (String)aValue;
-
-            FormulaTxn txn = transactions.get(rowIndex);
-
-            if (columnIndex == 2) {
-                txn.setA(value);
-            } else if (columnIndex == 3) {
-                txn.setB(value);
-            }
-
-            transactions.set(rowIndex, txn);
-
-            fireTableRowsUpdated(rowIndex, rowIndex);
-        }
     }
 }

@@ -16,16 +16,16 @@ public class MDApi {
 
     public static final String ENABLED_KEY = "formula";
 
-    private FeatureModuleContext context;
+    private static FeatureModuleContext context;
 
     private Supplier<MoneydanceGUI> gui;
 
     public MDApi(FeatureModuleContext context, Supplier<MoneydanceGUI> gui) {
-        this.context = context;
         this.gui = gui;
+        MDApi.context = context;
     }
 
-    public AccountBook getBook() {
+    public static AccountBook getBook() {
         return context.getCurrentAccountBook();
     }
 
@@ -45,13 +45,13 @@ public class MDApi {
         reminder.syncItem();
     }
 
-    public CurrencyType getBaseCurrency() {
-        return getBook().getCurrencies().getBaseType();
+    public static char getDecimalChar() {
+        return UserPreferences.getInstance().getDecimalChar();
     }
 
-    public String formatCurrency(long value) {
-        char decimalChar = UserPreferences.getInstance().getDecimalChar();
-        return getBaseCurrency().formatFancy(value, decimalChar);
+    public static String formatCurrency(long value) {
+        CurrencyType currencyType = getBook().getCurrencies().getBaseType();
+        return currencyType.formatFancy(value, getDecimalChar());
     }
 
     public MoneydanceGUI getGUI() {
