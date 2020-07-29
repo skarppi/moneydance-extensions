@@ -69,6 +69,7 @@ public class MDApi {
     public static void log(String msg, Throwable error) {
         System.out.println("moneydance-formula: " + msg);
         if (error != null) {
+            System.out.println(error.getMessage());
             error.printStackTrace();
         }
     }

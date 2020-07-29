@@ -36,13 +36,20 @@ public class FormulaTxn {
         return formula.replace("%", "/100.0");
     }
 
+    private String addParentheses(String formula) {
+        if (formula.contains("+") || formula.contains("-")) {
+            return "(" + formula + ")";
+        }
+        return formula;
+    }
+
     private String formula() {
         if (StringUtils.isNoneBlank(A)  && StringUtils.isNoneBlank(B)) {
-            return replacePercent(String.format("(%s)*(%s)", A, B));
+            return addParentheses(A) + "*" + addParentheses(B);
         } else if (StringUtils.isNoneBlank(A)) {
-            return replacePercent(A);
+            return A;
         } else if (StringUtils.isNoneBlank(B)) {
-            return replacePercent(B);
+            return B;
         } else {
             return null;
         }
@@ -53,7 +60,7 @@ public class FormulaTxn {
         try {
             Object value;
             if (formula != null) {
-                value = engine.eval(formula);
+                value = engine.eval(replacePercent(formula));
             } else {
                 return txn.getValue();
             }
@@ -80,9 +87,7 @@ public class FormulaTxn {
         String description = txn.getDescription();
         String formula = formula();
         if (formula != null) {
-            description += " ("
-                    + formula.replace("(", "").replace(")", "")
-                    + " )";
+            description += " (" + formula + ")";
         }
         return description;
     }
@@ -111,12 +116,12 @@ public class FormulaTxn {
 
     public String formatPayment() {
         Long value = calculateAmount();
-        return value >= 0 ? format(value) : "N/A";
+        return value >= 0 ? format(value) : "";
     }
 
     public String formatDeposit() {
         Long value = calculateAmount();
-        return value < 0 ? format(value) : "N/A";
+        return value < 0 ? format(value) : "";
     }
 
     public String toString() {
