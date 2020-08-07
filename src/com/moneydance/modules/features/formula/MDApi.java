@@ -61,4 +61,15 @@ public class MDApi {
     public CustomDateFormat getShortDateFormatter() {
         return getGUI().getPreferences().getShortDateFormatter();
     }
+
+    public static void log(String msg) {
+        log(msg, null);
+    }
+
+    public static void log(String msg, Throwable error) {
+        System.out.println("moneydance-formula: " + msg);
+        if (error != null) {
+            error.printStackTrace();
+        }
+    }
 }

@@ -109,7 +109,7 @@ public class ReminderDetails extends JPanel {
         for(int i=0; i < newTxn.getSplitCount(); i++) {
             FormulaTxn formulaTxn = tableModel.transactions.get(i);
             SplitTxn split = newTxn.getSplit(i);
-            split.setAmount(formulaTxn.getAmount());
+            split.setAmount(formulaTxn.calculateAmount());
             split.setDescription(formulaTxn.getDescription());
         }
 
@@ -140,9 +140,6 @@ public class ReminderDetails extends JPanel {
         private String A;
         private String B;
 
-        private long paymentValue;
-        private long depositValue;
-
         public FormulaTxn(SplitTxn txn) {
             this.txn = txn;
 
@@ -150,15 +147,12 @@ public class ReminderDetails extends JPanel {
         }
 
         private void readSettings() {
-            paymentValue = txn.getValue() >= 0 ? txn.getValue() : 0;
-            depositValue = txn.getValue() < 0 ? -txn.getValue() : 0;
-
             A = txn.getParameter("formula_a");
             B = txn.getParameter("formula_b");
         }
 
         public void syncSettings() {
-            long value = getAmount();
+            long value = calculateAmount();
             txn.setAmount(value, value);
             txn.setParameter("formula_a", A);
             txn.setParameter("formula_b", B);
@@ -178,29 +172,31 @@ public class ReminderDetails extends JPanel {
             }
         }
 
-        public long calculate(long defaultValue) {
+        public Long calculateAmount() {
+            String formula = formula();
             try {
-                String formula = formula();
                 Object value;
                 if (formula != null) {
                     value = engine.eval(formula);
                 } else {
-                    return defaultValue;
+                    return txn.getValue();
                 }
 
                 if (value instanceof Double) {
                     return Math.round(100 * (Double) value);
                 } else if (value instanceof Float) {
-                    return Math.round(100 * (Float)value);
+                    return (long) Math.round(100 * (Float) value);
                 } else if (value instanceof Long) {
                     return 100 * (Long)value;
                 } else if (value instanceof Integer) {
-                    return 100 * (Integer)value;
+                    return (long) (100 * (Integer) value);
                 } else {
-                    return 0;
+                    MDApi.log("Unknown value type " + (value != null ? value.getClass() : null));
+                    return null;
                 }
             } catch (Exception e) {
-                return 0;
+                MDApi.log("Failed to evaluate formula " + formula, e);
+                return null;
             }
         }
 
@@ -215,24 +211,17 @@ public class ReminderDetails extends JPanel {
             return description;
         }
 
-        public long getAmount() {
-            if (paymentValue > 0) {
-                return calculate(paymentValue);
-            } else if (depositValue > 0) {
-                return calculate(depositValue);
-            } else {
-                return 0;
-            }
-        }
-
-        public String format(long defaultValue) {
-            if (defaultValue == 0) {
-                return null;
-            }
-
-            long value = calculate(defaultValue);
-            if (value == 0) {
+        private String format(Long value) {
+            if (value == null) {
                 return "N/A";
+            }
+
+            long defaultValue = txn.getValue();
+
+            if (value < 0) {
+                // render values as positive
+                value *= -1;
+                defaultValue *= -1;
             }
 
             if (value != defaultValue) {
@@ -245,11 +234,13 @@ public class ReminderDetails extends JPanel {
         }
 
         public String formatPayment() {
-            return format(paymentValue);
+            Long value = calculateAmount();
+            return value >= 0 ? format(value) : "N/A";
         }
 
         public String formatDeposit() {
-            return format(depositValue);
+            Long value = calculateAmount();
+            return value < 0 ? format(value) : "N/A";
         }
 
         public String toString() {
