@@ -160,13 +160,17 @@ public class ReminderDetails extends JPanel {
             readSettings();
         }
 
+        private String replacePercent(String formula) {
+            return formula.replace("%", "/100.0");
+        }
+
         private String formula() {
             if (StringUtils.isNoneBlank(A)  && StringUtils.isNoneBlank(B)) {
-                return String.format("(%s)*(%s)", A, B);
+                return replacePercent(String.format("(%s)*(%s)", A, B));
             } else if (StringUtils.isNoneBlank(A)) {
-                return A;
+                return replacePercent(A);
             } else if (StringUtils.isNoneBlank(B)) {
-                return B;
+                return replacePercent(B);
             } else {
                 return null;
             }
