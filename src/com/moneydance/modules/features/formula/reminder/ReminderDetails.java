@@ -68,7 +68,7 @@ public class ReminderDetails extends JPanel {
         parentTxn = reminder != null ? reminder.getTransaction() : null;
 
         tableModel.setTransactions(IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
-                .mapToObj(i -> new FormulaTxn(parentTxn.getSplit(i)))
+                .mapToObj(i -> new FormulaTxn(parentTxn.getSplit(i), tableModel))
                 .collect(Collectors.toList()));
 
         summaryLabel.setText(summaryText());
@@ -97,7 +97,7 @@ public class ReminderDetails extends JPanel {
         for(int i=0; i < newTxn.getSplitCount(); i++) {
             FormulaTxn formulaTxn = tableModel.getTransactions().get(i);
             SplitTxn split = newTxn.getSplit(i);
-            split.setAmount(formulaTxn.calculateAmount());
+            split.setAmount(formulaTxn.calculateAmountInCents());
             split.setDescription(formulaTxn.getDescription());
         }
 
