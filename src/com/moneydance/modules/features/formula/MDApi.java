@@ -70,7 +70,7 @@ public class MDApi {
         System.out.println("moneydance-formula: " + msg);
         if (error != null) {
             System.out.println(error.getMessage());
-            error.printStackTrace();
+//            error.printStackTrace();
         }
     }
 }
