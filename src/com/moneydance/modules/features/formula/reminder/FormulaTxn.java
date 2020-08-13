@@ -21,6 +21,7 @@ public class FormulaTxn {
     private SplitTxnTableModel tableModel;
     private String A;
     private String B;
+    private String C;
 
     private static ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("py");
 
@@ -30,13 +31,15 @@ public class FormulaTxn {
 
         A = txn.getParameter("formula_a");
         B = txn.getParameter("formula_b");
+        C = txn.getParameter("formula_c");
     }
 
     public void syncSettings() {
-        long value = calculateAmountInCents();
+        long value = getAmount();
         txn.setAmount(value, value);
         txn.setParameter("formula_a", A);
         txn.setParameter("formula_b", B);
+        txn.setParameter("formula_c", C);
     }
 
     private String addParentheses(String formula) {
@@ -47,26 +50,18 @@ public class FormulaTxn {
     }
 
     private String formula() {
+        String add = StringUtils.isNoneBlank(C) ? ("+" + C) : "";
         if (StringUtils.isNoneBlank(A)  && StringUtils.isNoneBlank(B)) {
-            return addParentheses(A) + "*" + addParentheses(B);
+            return addParentheses(A) + "*" + addParentheses(B) + add;
         } else if (StringUtils.isNoneBlank(A)) {
-            return A;
+            return A + add;
         } else if (StringUtils.isNoneBlank(B)) {
-            return B;
+            return B + add;
+        } else if (StringUtils.isNoneBlank(C)) {
+            return C;
         } else {
             return null;
         }
-    }
-
-    public long calculateAmountInCents() {
-        String formula = formula();
-
-        if (formula == null) {
-            return txn.getValue();
-        }
-
-        Pair<Long, String> value = centsOrError(formula);
-        return value.getLeft() != null ? value.getLeft() : 0;
     }
 
     private Pair<Long, String> centsOrError(String script) {
@@ -88,13 +83,17 @@ public class FormulaTxn {
         }
     }
 
-    private Object cellValue(char column, int row) {
-        FormulaTxn txn = tableModel.getTransactions().get(row - 1);
+    private Object cellValue(String script, FormulaTxn split, char column, int row) {
+        String cell = "" + column + row;
+        if (!script.contains(cell)) {
+            // calculate value only if used somewhere
+            return null;
+        }
 
-        if (txn == this) {
+        if (split == this) {
             return "#REF!";
         } else {
-            return txn.eval('A' == column ? txn.A : txn.B);
+            return split.eval('A' == column ? split.A : ('B' == column ? split.B : split.C));
         }
     }
 
@@ -106,11 +105,18 @@ public class FormulaTxn {
         try {
             Bindings bindings = engine.createBindings();
             bindings.put("DAYS_IN_MONTH", LocalDate.now().lengthOfMonth());
-            bindings.put("BALANCE", txn.getAccount().getBalance());
+            bindings.put("BALANCE", txn.getAccount().getBalance() / 100.0);
 
             IntStream.rangeClosed(1, tableModel.getRowCount()).forEach(row -> {
-                bindings.put("A" + row, script.contains("A" + row) ? cellValue('A', row) : null);
-                bindings.put("B" + row, script.contains("B" + row) ? cellValue('B', row) : null);
+                FormulaTxn split = tableModel.getTransactions().get(row - 1);
+                long value = split.getAmount();
+
+                bindings.put("A" + row, cellValue(script, split, 'A', row));
+                bindings.put("B" + row, cellValue(script, split, 'B', row));
+                bindings.put("C" + row, cellValue(script, split, 'C', row));
+                bindings.put("D" + row, value > 0 ? value / 100.0 : 0);
+                bindings.put("E" + row, value < 0 ? value / 100.0 : 0);
+                bindings.put("BALANCE" + row, split.getTxn().getAccount().getBalance() / 100.0);
             });
 
             if (script.equals("?")) {
@@ -139,6 +145,12 @@ public class FormulaTxn {
             MDApi.log("Failed to evaluate script " + script, e);
             return e.getMessage();
         }
+    }
+
+    public long getAmount() {
+        String formula = formula();
+        Pair<Long, String> value = centsOrError(formula);
+        return value.getLeft() != null ? value.getLeft() : txn.getValue();
     }
 
     public String getDescription() {
@@ -198,4 +210,9 @@ public class FormulaTxn {
     public void setB(String value) {
         B = value;
     }
+
+    public void setC(String value) {
+            C = value;
+    }
+
 }

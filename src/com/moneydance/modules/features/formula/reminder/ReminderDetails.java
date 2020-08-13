@@ -97,7 +97,7 @@ public class ReminderDetails extends JPanel {
         for(int i=0; i < newTxn.getSplitCount(); i++) {
             FormulaTxn formulaTxn = tableModel.getTransactions().get(i);
             SplitTxn split = newTxn.getSplit(i);
-            split.setAmount(formulaTxn.calculateAmountInCents());
+            split.setAmount(formulaTxn.getAmount());
             split.setDescription(formulaTxn.getDescription());
         }
 

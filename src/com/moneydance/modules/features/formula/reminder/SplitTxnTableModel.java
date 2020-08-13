@@ -23,7 +23,7 @@ public class SplitTxnTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 6;
+        return 7;
     }
 
     @Override
@@ -34,11 +34,13 @@ public class SplitTxnTableModel extends AbstractTableModel {
             case 2:
                 return "A";
             case 3:
-                return "B";
+                return "* B";
             case 4:
-                return "Payment";
+                return "+ C";
             case 5:
-                return "Deposit";
+                return "Payment (D)";
+            case 6:
+                return "Deposit (E)";
             default :
                 return "Name";
         }
@@ -56,8 +58,10 @@ public class SplitTxnTableModel extends AbstractTableModel {
             case 3:
                 return f.getB();
             case 4:
-                return f.formatPayment();
+                return f.getC();
             case 5:
+                return f.formatPayment();
+            case 6:
                 return f.formatDeposit();
             default :
                 return f.toString();
@@ -66,7 +70,7 @@ public class SplitTxnTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return 2 <= columnIndex && columnIndex <= 3;
+        return 2 <= columnIndex && columnIndex <= 4;
     }
 
     @Override
@@ -82,6 +86,8 @@ public class SplitTxnTableModel extends AbstractTableModel {
             txn.setA(value);
         } else if (columnIndex == 3) {
             txn.setB(value);
+        } else if (columnIndex == 4) {
+            txn.setC(value);
         }
 
         transactions.set(rowIndex, txn);
