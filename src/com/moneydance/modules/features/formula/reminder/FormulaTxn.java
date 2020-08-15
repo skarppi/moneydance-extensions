@@ -4,7 +4,6 @@ import com.infinitekind.moneydance.model.SplitTxn;
 import com.moneydance.modules.features.formula.MDApi;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -12,8 +11,9 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Data
 public class FormulaTxn {
@@ -64,36 +64,19 @@ public class FormulaTxn {
         }
     }
 
-    private Pair<Long, String> centsOrError(String script) {
-        Object value = eval(script);
-
+    public static Long toCents(Object value) {
         if (value instanceof Double) {
-            return Pair.of(Math.round(100 * (Double) value), null);
+            return Math.round(100 * (Double) value);
         } else if (value instanceof Float) {
-            return Pair.of((long) Math.round(100 * (Float) value), null);
+            return (long) Math.round(100 * (Float) value);
         } else if (value instanceof Long) {
-            return Pair.of(100 * (Long)value, null);
+            return 100 * (Long)value;
         } else if (value instanceof Integer) {
-            return Pair.of((long) (100 * (Integer) value), null);
+            return (long) (100 * (Integer) value);
         } else if (value instanceof BigInteger) {
-            return Pair.of(100 * ((BigInteger) value).longValue(), null);
+            return 100 * ((BigInteger) value).longValue();
         } else {
-            // MDApi.log("Unknown value type " + (value != null ? value.getClass() : null));
-            return Pair.of(null, (value != null ? value.toString() : null));
-        }
-    }
-
-    private Object cellValue(String script, FormulaTxn split, char column, int row) {
-        String cell = "" + column + row;
-        if (!script.contains(cell)) {
-            // calculate value only if used somewhere
             return null;
-        }
-
-        if (split == this) {
-            return "#REF!";
-        } else {
-            return split.eval('A' == column ? split.A : ('B' == column ? split.B : split.C));
         }
     }
 
@@ -107,17 +90,7 @@ public class FormulaTxn {
             bindings.put("DAYS_IN_MONTH", LocalDate.now().lengthOfMonth());
             bindings.put("BALANCE", txn.getAccount().getBalance() / 100.0);
 
-            IntStream.rangeClosed(1, tableModel.getRowCount()).forEach(row -> {
-                FormulaTxn split = tableModel.getTransactions().get(row - 1);
-                long value = split.getAmount();
-
-                bindings.put("A" + row, cellValue(script, split, 'A', row));
-                bindings.put("B" + row, cellValue(script, split, 'B', row));
-                bindings.put("C" + row, cellValue(script, split, 'C', row));
-                bindings.put("D" + row, value > 0 ? value / 100.0 : 0);
-                bindings.put("E" + row, value < 0 ? value / 100.0 : 0);
-                bindings.put("BALANCE" + row, split.getTxn().getAccount().getBalance() / 100.0);
-            });
+            bindings.putAll(tableModel.getCache());
 
             if (script.equals("?")) {
                 return bindings.keySet().stream().sorted().collect(Collectors.toList()).toString();
@@ -131,6 +104,11 @@ public class FormulaTxn {
                 return "#N/A!";
             }
             if (e.getMessage().startsWith("NameError:")) {
+                Pattern p = Pattern.compile("'([A-E][1-" + tableModel.getRowCount() + "])'");
+                Matcher matcher = p.matcher(e.getMessage());
+                if (matcher.find()) {
+                    return "#NAME? " + matcher.group(1);
+                }
                 return "#NAME?";
             }
             if (e.getMessage().startsWith("ZeroDivisionError:")) {
@@ -148,9 +126,8 @@ public class FormulaTxn {
     }
 
     public long getAmount() {
-        String formula = formula();
-        Pair<Long, String> value = centsOrError(formula);
-        return value.getLeft() != null ? value.getLeft() : txn.getValue();
+        Long value = toCents(getRowValue());
+        return value != null ? value : txn.getValue();
     }
 
     public String getDescription() {
@@ -162,12 +139,12 @@ public class FormulaTxn {
         return description;
     }
 
-    private String format(Pair<Long, String> valueOrError, boolean showNegativeOnly) {
-        if (valueOrError.getRight() != null) {
-            return valueOrError.getRight();
+    private String format(Object valueOrError, boolean showNegativeOnly) {
+        if (valueOrError != null && !(valueOrError instanceof Number)) {
+            return valueOrError.toString();
         }
 
-        Long value = valueOrError.getLeft();
+        Long value = toCents(valueOrError);
 
         long defaultValue = txn.getValue();
         if (value == null) {
@@ -191,28 +168,33 @@ public class FormulaTxn {
         }
     }
 
-    public String formatPayment() {
-        return format(centsOrError(formula()), false);
+    public String formatPayment(int rowIndex) {
+        return format(tableModel.getCache().get("D" + (rowIndex + 1)), false);
     }
 
-    public String formatDeposit() {
-        return format(centsOrError(formula()), true);
+    public String formatDeposit(int rowIndex) {
+        return format(tableModel.getCache().get("E" + (rowIndex + 1)), true);
     }
 
     public String toString() {
         return txn.getDescription();
     }
 
-    public void setA(String value) {
-        A = value;
+    public String getCellSource(char col) {
+        switch (col) {
+            case 'A': return A;
+            case 'B': return B;
+            case 'C': return C;
+            default: return null;
+        }
     }
 
-    public void setB(String value) {
-        B = value;
+    public Object getRowValue() {
+        return eval(formula());
     }
 
-    public void setC(String value) {
-            C = value;
+    public Object getCellValue(char col) {
+        return eval(getCellSource(col));
     }
 
 }

@@ -1,18 +1,69 @@
 package com.moneydance.modules.features.formula.reminder;
 
+import com.moneydance.modules.features.formula.split.Cell;
 import lombok.Getter;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class SplitTxnTableModel extends AbstractTableModel {
 
     @Getter
     private List<FormulaTxn> transactions = new ArrayList<>();
 
+    @Getter
+    private HashMap<String, Object> cache = new HashMap<>();
+
     public void setTransactions(List<FormulaTxn> transactions) {
         this.transactions = transactions;
+        this.calculate();
+    }
+
+    private void calculate() {
+        cache.clear();
+
+        // add work queue for all cells
+        Queue<Cell> processingQueue = new LinkedList<>();
+        IntStream.rangeClosed(1, getRowCount()).forEach(row -> {
+            FormulaTxn split = transactions.get(row - 1);
+
+            cache.put("BALANCE" + row, split.getTxn().getAccount().getBalance() / 100.0);
+
+            Arrays.asList('A', 'B', 'C', 'D', 'E').forEach(col ->
+                    processingQueue.add(Cell.builder()
+                            .cell("" + col + row)
+                            .col(col)
+                            .row(row)
+                            .txn(split)
+                            .deps(new ArrayList())
+                            .build())
+            );
+        });
+
+        while(!processingQueue.isEmpty()) {
+
+            Cell cell = processingQueue.poll();
+
+            Object value = cell.evalCell();
+            if (value instanceof String && ((String) value).startsWith("#NAME? ")) {
+                String cellMissing = ((String) value).substring(7);
+
+                // keep track of dependencies to prevent infinite loops
+                cell.getDeps().add(cellMissing);
+
+                if (processingQueue.stream().allMatch(c -> c.isLoop())) {
+                    // all rows are in a loop, give up and show errors
+                    cache.put(cell.getCell(), value);
+                } else {
+                    // try again later when dependency is ready
+                    processingQueue.offer(cell);
+                }
+            } else {
+                cache.put(cell.getCell(), value);
+            }
+        }
+
         fireTableDataChanged();
     }
 
@@ -60,9 +111,9 @@ public class SplitTxnTableModel extends AbstractTableModel {
             case 4:
                 return f.getC();
             case 5:
-                return f.formatPayment();
+                return f.formatPayment(rowIndex);
             case 6:
-                return f.formatDeposit();
+                return f.formatDeposit(rowIndex);
             default :
                 return f.toString();
         }
@@ -92,6 +143,6 @@ public class SplitTxnTableModel extends AbstractTableModel {
 
         transactions.set(rowIndex, txn);
 
-        fireTableRowsUpdated(rowIndex, rowIndex);
+        calculate();
     }
 }
