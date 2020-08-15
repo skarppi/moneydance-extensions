@@ -8,7 +8,7 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RemindersTableModel extends AbstractTableModel {
+public class RemindersListTableModel extends AbstractTableModel {
 
     private final Reminder NEW_ENTRY = new Reminder(null);
 
@@ -16,7 +16,7 @@ public class RemindersTableModel extends AbstractTableModel {
 
     private CustomDateFormat dateFormat;
 
-    public RemindersTableModel(MDApi api) {
+    public RemindersListTableModel(MDApi api) {
         dateFormat = api.getShortDateFormatter();
     }
 

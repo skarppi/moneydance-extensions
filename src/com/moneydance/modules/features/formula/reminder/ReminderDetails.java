@@ -5,6 +5,7 @@ import com.moneydance.apps.md.view.gui.EditRemindersWindow;
 import com.moneydance.apps.md.view.gui.MDAction;
 import com.moneydance.awt.GridC;
 import com.moneydance.modules.features.formula.MDApi;
+import com.moneydance.modules.features.formula.split.FormulaSplitTxn;
 import com.moneydance.util.UiUtil;
 
 import javax.swing.*;
@@ -20,7 +21,7 @@ public class ReminderDetails extends JPanel {
 
     private ParentTxn parentTxn;
 
-    private SplitTxnTableModel tableModel;
+    private ReminderDetailsTableModel tableModel;
 
     private JTable txTable;
 
@@ -29,7 +30,7 @@ public class ReminderDetails extends JPanel {
     public ReminderDetails(MDApi mdApi) {
         api = mdApi;
 
-        tableModel = new SplitTxnTableModel();
+        tableModel = new ReminderDetailsTableModel();
 
         txTable = new JTable(tableModel);
 
@@ -68,7 +69,7 @@ public class ReminderDetails extends JPanel {
         parentTxn = reminder != null ? reminder.getTransaction() : null;
 
         tableModel.setTransactions(IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
-                .mapToObj(i -> new FormulaTxn(parentTxn.getSplit(i), tableModel))
+                .mapToObj(i -> new FormulaSplitTxn(i, parentTxn.getSplit(i), tableModel.getResolver()))
                 .collect(Collectors.toList()));
 
         summaryLabel.setText(summaryText());
@@ -76,8 +77,8 @@ public class ReminderDetails extends JPanel {
 
     public void storeSettings() {
         for(int i=0; i < parentTxn.getSplitCount(); i++) {
-            FormulaTxn formulaTxn = tableModel.getTransactions().get(i);
-            formulaTxn.syncSettings();
+            FormulaSplitTxn formulaSplitTxn = tableModel.getTransactions().get(i);
+            formulaSplitTxn.syncSettings();
         }
         reminder.syncItem();
 
@@ -95,10 +96,10 @@ public class ReminderDetails extends JPanel {
         newTxn.setDateEntered(System.currentTimeMillis());
 
         for(int i=0; i < newTxn.getSplitCount(); i++) {
-            FormulaTxn formulaTxn = tableModel.getTransactions().get(i);
+            FormulaSplitTxn formulaSplitTxn = tableModel.getTransactions().get(i);
             SplitTxn split = newTxn.getSplit(i);
-            split.setAmount(formulaTxn.getAmount());
-            split.setDescription(formulaTxn.getDescription());
+            split.setAmount(formulaSplitTxn.getAmount());
+            split.setDescription(formulaSplitTxn.getDescription());
         }
 
         txns.addNewTxn(newTxn);

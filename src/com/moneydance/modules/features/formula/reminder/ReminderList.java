@@ -13,7 +13,7 @@ import java.awt.*;
 
 public class ReminderList extends JPanel {
 
-    private RemindersTableModel tableModel;
+    private RemindersListTableModel tableModel;
     private JTable reminderTable;
     private DefaultComboBoxModel<Reminder> comboBoxModel = new DefaultComboBoxModel<>();
     private MDApi api;
@@ -21,7 +21,7 @@ public class ReminderList extends JPanel {
     public ReminderList(MDApi api) {
         this.api = api;
 
-        tableModel = new RemindersTableModel(api);
+        tableModel = new RemindersListTableModel(api);
         reload();
 
         reminderTable = new JTable(tableModel);

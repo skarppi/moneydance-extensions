@@ -1,33 +1,25 @@
-package com.moneydance.modules.features.formula.reminder;
+package com.moneydance.modules.features.formula.split;
 
 import com.infinitekind.moneydance.model.SplitTxn;
 import com.moneydance.modules.features.formula.MDApi;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.math.BigInteger;
-import java.time.LocalDate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Data
-public class FormulaTxn {
+public class FormulaSplitTxn {
+    private int splitIndex;
     private SplitTxn txn;
-    private SplitTxnTableModel tableModel;
+    private FormulaResolver resolver;
     private String A;
     private String B;
     private String C;
 
-    private static ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("py");
-
-    public FormulaTxn(SplitTxn txn, SplitTxnTableModel tableModel) {
+    public FormulaSplitTxn(int splitIndex, SplitTxn txn, FormulaResolver resolver) {
+        this.splitIndex = splitIndex;
         this.txn = txn;
-        this.tableModel = tableModel;
+        this.resolver = resolver;
 
         A = txn.getParameter("formula_a");
         B = txn.getParameter("formula_b");
@@ -80,53 +72,8 @@ public class FormulaTxn {
         }
     }
 
-    private Object eval(String script) {
-        if (script == null) {
-            return null;
-        }
-
-        try {
-            Bindings bindings = engine.createBindings();
-            bindings.put("DAYS_IN_MONTH", LocalDate.now().lengthOfMonth());
-            bindings.put("BALANCE", txn.getAccount().getBalance() / 100.0);
-
-            bindings.putAll(tableModel.getCache());
-
-            if (script.equals("?")) {
-                return bindings.keySet().stream().sorted().collect(Collectors.toList()).toString();
-            }
-
-            return engine.eval(script.replace("%", "/100.0"), bindings);
-        } catch (ScriptException e) {
-            MDApi.log("Failed to evaluate script " + script, e);
-
-            if (e.getMessage().startsWith("TypeError:")) {
-                return "#N/A!";
-            }
-            if (e.getMessage().startsWith("NameError:")) {
-                Pattern p = Pattern.compile("'([A-E][1-" + tableModel.getRowCount() + "])'");
-                Matcher matcher = p.matcher(e.getMessage());
-                if (matcher.find()) {
-                    return "#NAME? " + matcher.group(1);
-                }
-                return "#NAME?";
-            }
-            if (e.getMessage().startsWith("ZeroDivisionError:")) {
-                return "#DIV/0!";
-            }
-            if (e.getMessage().startsWith("SyntaxError:")) {
-                return "#NUM!";
-            }
-
-            return e.getMessage();
-        } catch (Exception e) {
-            MDApi.log("Failed to evaluate script " + script, e);
-            return e.getMessage();
-        }
-    }
-
     public long getAmount() {
-        Long value = toCents(getCellValue('V'));
+        Long value = toCents(resolver.getValue(splitIndex));
         return value != null ? value : txn.getValue();
     }
 
@@ -177,12 +124,8 @@ public class FormulaTxn {
             case 'A': return A;
             case 'B': return B;
             case 'C': return C;
+            case 'V': return formula();
             default: return null;
         }
     }
-
-    public Object getCellValue(char col) {
-        return eval('V' == col ? formula() : getCellSource(col));
-    }
-
 }
