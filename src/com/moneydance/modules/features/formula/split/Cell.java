@@ -23,20 +23,6 @@ public class Cell {
     }
 
     public Object evalCell() {
-        if (Arrays.asList('D', 'E').contains(col)) {
-            Object value = txn.getRowValue();
-            if (value instanceof Number) {
-                if (col == 'D') {
-                    return ((Number)value).doubleValue() >= 0 ? value : null;
-                } else if (col == 'E') {
-                    return ((Number)value).doubleValue() < 0 ? value : null;
-                }
-            } else {
-                return value;
-            }
-
-        }
-
         return txn.getCellValue(col);
     }
 }

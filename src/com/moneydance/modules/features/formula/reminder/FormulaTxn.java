@@ -126,7 +126,7 @@ public class FormulaTxn {
     }
 
     public long getAmount() {
-        Long value = toCents(getRowValue());
+        Long value = toCents(getCellValue('V'));
         return value != null ? value : txn.getValue();
     }
 
@@ -139,7 +139,7 @@ public class FormulaTxn {
         return description;
     }
 
-    private String format(Object valueOrError, boolean showNegativeOnly) {
+    public String formatValue(Object valueOrError, boolean showNegativeOnly) {
         if (valueOrError != null && !(valueOrError instanceof Number)) {
             return valueOrError.toString();
         }
@@ -168,14 +168,6 @@ public class FormulaTxn {
         }
     }
 
-    public String formatPayment(int rowIndex) {
-        return format(tableModel.getCache().get("D" + (rowIndex + 1)), false);
-    }
-
-    public String formatDeposit(int rowIndex) {
-        return format(tableModel.getCache().get("E" + (rowIndex + 1)), true);
-    }
-
     public String toString() {
         return txn.getDescription();
     }
@@ -189,12 +181,8 @@ public class FormulaTxn {
         }
     }
 
-    public Object getRowValue() {
-        return eval(formula());
-    }
-
     public Object getCellValue(char col) {
-        return eval(getCellSource(col));
+        return eval('V' == col ? formula() : getCellSource(col));
     }
 
 }

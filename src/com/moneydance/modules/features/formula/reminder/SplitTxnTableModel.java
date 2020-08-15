@@ -30,7 +30,7 @@ public class SplitTxnTableModel extends AbstractTableModel {
 
             cache.put("BALANCE" + row, split.getTxn().getAccount().getBalance() / 100.0);
 
-            Arrays.asList('A', 'B', 'C', 'D', 'E').forEach(col ->
+            Arrays.asList('A', 'B', 'C', 'V').forEach(col ->
                     processingQueue.add(Cell.builder()
                             .cell("" + col + row)
                             .col(col)
@@ -89,9 +89,9 @@ public class SplitTxnTableModel extends AbstractTableModel {
             case 4:
                 return "+ C";
             case 5:
-                return "Payment (D)";
+                return "Payment (+V)";
             case 6:
-                return "Deposit (E)";
+                return "Deposit (-V)";
             default :
                 return "Name";
         }
@@ -111,9 +111,9 @@ public class SplitTxnTableModel extends AbstractTableModel {
             case 4:
                 return f.getC();
             case 5:
-                return f.formatPayment(rowIndex);
+                return f.formatValue(cache.get("V" + (rowIndex + 1)), false);
             case 6:
-                return f.formatDeposit(rowIndex);
+                return f.formatValue(cache.get("V" + (rowIndex + 1)), true);
             default :
                 return f.toString();
         }
