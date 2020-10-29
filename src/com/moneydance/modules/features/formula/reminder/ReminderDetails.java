@@ -62,6 +62,9 @@ public class ReminderDetails extends JPanel {
         add(new JButton(recordAction), GridC.getc(2, 0).east());
         add(new JScrollPane(txTable), GridC.getc(0, 1).colspan(3).wxy(1,1).fillboth());
         add(summaryPanel(), GridC.getc(2, 2).east());
+
+        // update summary after data changes
+        tableModel.addTableModelListener(e -> summaryLabel.setText(summaryText()));
     }
 
     public void setReminder(Reminder reminder) {
@@ -71,8 +74,6 @@ public class ReminderDetails extends JPanel {
         tableModel.setTransactions(IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
                 .mapToObj(i -> new FormulaSplitTxn(i, parentTxn.getSplit(i), tableModel.getResolver()))
                 .collect(Collectors.toList()));
-
-        summaryLabel.setText(summaryText());
     }
 
     public void storeSettings() {
@@ -109,7 +110,9 @@ public class ReminderDetails extends JPanel {
     }
 
     private String summaryText() {
-        long value = parentTxn != null ? parentTxn.getValue() : 0;
+        long value = tableModel.getTransactions().stream()
+                .map(FormulaSplitTxn::getAmount)
+                .collect(Collectors.summingLong(Long::longValue));
         return String.format("Payment: %s  Deposit: %s",
                 MDApi.formatCurrency(value < 0 ? -value : 0),
                 MDApi.formatCurrency(value > 0 ? value : 0));
