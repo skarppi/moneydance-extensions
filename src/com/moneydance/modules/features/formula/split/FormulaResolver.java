@@ -21,8 +21,12 @@ public class FormulaResolver {
 
     private static ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("py");
 
+    public Object getValue(String column, int splitIndex) {
+        return cache.get(column + (splitIndex + 1));
+    }
+
     public Object getValue(int splitIndex) {
-        return cache.get("V" + (splitIndex + 1));
+        return getValue("V", splitIndex);
     }
 
     // resolve and cache results for all transactions

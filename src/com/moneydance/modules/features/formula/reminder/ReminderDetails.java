@@ -11,6 +11,7 @@ import com.moneydance.util.UiUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -34,7 +35,23 @@ public class ReminderDetails extends JPanel {
 
         tableModel = new ReminderDetailsTableModel();
 
-        txTable = new JTable(tableModel);
+        txTable = new JTable(tableModel) {
+            //Implement table cell tool tips.
+            public String getToolTipText(MouseEvent e) {
+                java.awt.Point p = e.getPoint();
+                int rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+
+                try {
+                    return tableModel.getTooltipAt(rowIndex, colIndex);
+                } catch (RuntimeException e1) {
+                    //catch null pointer exception if mouse is over an empty line
+                    e1.printStackTrace();
+                    System.out.println(e1);
+                }
+                return null;
+            }
+        };
 
         setLayout(new BorderLayout(UiUtil.DLG_HGAP, UiUtil.DLG_VGAP));
         setBorder(BorderFactory.createEmptyBorder(UiUtil.VGAP, UiUtil.HGAP,

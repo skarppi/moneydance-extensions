@@ -81,6 +81,20 @@ public class ReminderDetailsTableModel extends AbstractTableModel {
         }
     }
 
+    public String getTooltipAt(int rowIndex, int columnIndex) {
+        FormulaSplitTxn f = transactions.get(rowIndex);
+        switch (columnIndex) {
+            case 2:
+                return resolver.getValue("A", rowIndex).toString();
+            case 3:
+                return resolver.getValue("B", rowIndex).toString();
+            case 4:
+                return resolver.getValue("C", rowIndex).toString();
+            default :
+                return null;
+        }
+    }
+
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return 2 <= columnIndex && columnIndex <= 4;
