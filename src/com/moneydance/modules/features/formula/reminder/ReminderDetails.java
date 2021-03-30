@@ -92,7 +92,9 @@ public class ReminderDetails extends JPanel {
 
         int splitCount = parentTxn != null ? parentTxn.getSplitCount() : 0;
 
-        LocalDate nextPayment = MDApi.parseDate(reminder.getNextOccurance(29991231));
+        LocalDate nextPayment = reminder != null ?
+                MDApi.parseDate(reminder.getNextOccurance(29991231)) :
+                null;
 
         FormulaResolver resolver = tableModel.getResolver();
 
