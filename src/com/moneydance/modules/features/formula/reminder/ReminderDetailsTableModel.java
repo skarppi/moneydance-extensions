@@ -5,6 +5,7 @@ import com.moneydance.modules.features.formula.split.FormulaSplitTxn;
 import lombok.Getter;
 
 import javax.swing.table.AbstractTableModel;
+import java.time.LocalDate;
 import java.util.*;
 
 public class ReminderDetailsTableModel extends AbstractTableModel {
@@ -12,16 +13,19 @@ public class ReminderDetailsTableModel extends AbstractTableModel {
     @Getter
     private List<FormulaSplitTxn> transactions = new ArrayList<>();
 
+    private LocalDate nextPayment;
+
     @Getter
     private FormulaResolver resolver = new FormulaResolver();
 
-    public void setTransactions(List<FormulaSplitTxn> transactions) {
+    public void setTransactions(List<FormulaSplitTxn> transactions, LocalDate nextPayment) {
         this.transactions = transactions;
+        this.nextPayment = nextPayment;
         this.invalidate();
     }
 
     private void invalidate() {
-        resolver.resolve(transactions);
+        resolver.resolve(transactions, nextPayment);
         fireTableDataChanged();
     }
 

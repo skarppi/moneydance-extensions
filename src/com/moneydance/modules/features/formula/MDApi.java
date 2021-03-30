@@ -8,6 +8,8 @@ import com.moneydance.apps.md.controller.FeatureModuleContext;
 import com.moneydance.apps.md.controller.UserPreferences;
 import com.moneydance.apps.md.view.gui.MoneydanceGUI;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -19,6 +21,8 @@ public class MDApi {
     private static FeatureModuleContext context;
 
     private Supplier<MoneydanceGUI> gui;
+
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public MDApi(FeatureModuleContext context, Supplier<MoneydanceGUI> gui) {
         this.gui = gui;
@@ -60,6 +64,10 @@ public class MDApi {
 
     public CustomDateFormat getShortDateFormatter() {
         return getGUI().getPreferences().getShortDateFormatter();
+    }
+
+    public static LocalDate parseDate(int date) {
+        return LocalDate.parse(Integer.toString(date), formatter);
     }
 
     public static void log(String msg) {

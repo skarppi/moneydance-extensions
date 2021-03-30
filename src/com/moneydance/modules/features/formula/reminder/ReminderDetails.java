@@ -5,11 +5,13 @@ import com.moneydance.apps.md.view.gui.EditRemindersWindow;
 import com.moneydance.apps.md.view.gui.MDAction;
 import com.moneydance.awt.GridC;
 import com.moneydance.modules.features.formula.MDApi;
+import com.moneydance.modules.features.formula.split.FormulaResolver;
 import com.moneydance.modules.features.formula.split.FormulaSplitTxn;
 import com.moneydance.util.UiUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -71,9 +73,15 @@ public class ReminderDetails extends JPanel {
         this.reminder = reminder;
         parentTxn = reminder != null ? reminder.getTransaction() : null;
 
-        tableModel.setTransactions(IntStream.range(0, parentTxn != null ? parentTxn.getSplitCount() : 0)
-                .mapToObj(i -> new FormulaSplitTxn(i, parentTxn.getSplit(i), tableModel.getResolver()))
-                .collect(Collectors.toList()));
+        int splitCount = parentTxn != null ? parentTxn.getSplitCount() : 0;
+
+        LocalDate nextPayment = MDApi.parseDate(reminder.getNextOccurance(29991231));
+
+        FormulaResolver resolver = tableModel.getResolver();
+
+        tableModel.setTransactions(IntStream.range(0, splitCount)
+                .mapToObj(i -> new FormulaSplitTxn(i, parentTxn.getSplit(i), resolver))
+                .collect(Collectors.toList()), nextPayment);
     }
 
     public void storeSettings() {

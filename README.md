@@ -23,7 +23,8 @@ Supported formulas
 - Any python expression
 - Custom variables, check all by typing ```?``` or ```dir()```
   - Reference any cell similar to Excel: A1, B1, C1, V1, A2,...
-  - DAYS_IN_MONTH number of days in the current month. Useful when calculating interests.
+  - DAYS_IN_MONTH number of days in the month of the payment. Useful when calculating interests.
+  - DAYS_IN_PREVIOUT_MONTH number of days in the month before the payment. Useful when calculating interests.
   - BALANCE the balance of the selected category. Useful when calculating interests.
 - % sign can be used, e.g. 1% equals 0.01
 

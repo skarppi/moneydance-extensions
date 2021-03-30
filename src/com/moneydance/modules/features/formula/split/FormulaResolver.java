@@ -2,6 +2,7 @@ package com.moneydance.modules.features.formula.split;
 
 import com.moneydance.modules.features.formula.MDApi;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -25,10 +26,10 @@ public class FormulaResolver {
     }
 
     // resolve and cache results for all transactions
-    public void resolve(List<FormulaSplitTxn> transactions) {
+    public void resolve(List<FormulaSplitTxn> transactions, LocalDate nextPayment) {
         cache.clear();
 
-        Queue<Cell> processingQueue = initializeCellProcessingQueue(transactions);
+        Queue<Cell> processingQueue = initializeCellProcessingQueue(transactions, nextPayment);
 
         while(!processingQueue.isEmpty()) {
 
@@ -54,12 +55,14 @@ public class FormulaResolver {
         }
     }
 
-    private Queue<Cell> initializeCellProcessingQueue(List<FormulaSplitTxn> transactions) {
+    private Queue<Cell> initializeCellProcessingQueue(List<FormulaSplitTxn> transactions, LocalDate nextPayment) {
         Queue<Cell> processingQueue = new LinkedList<>();
         IntStream.rangeClosed(1, transactions.size()).forEach(row -> {
             FormulaSplitTxn split = transactions.get(row - 1);
 
             cache.put("BALANCE" + row, split.getTxn().getAccount().getBalance() / 100.0);
+            cache.put("DAYS_IN_PREVIOUS_MONTH", nextPayment.minusMonths(1).lengthOfMonth());
+            cache.put("DAYS_IN_MONTH", nextPayment.lengthOfMonth());
 
             Arrays.asList('A', 'B', 'C', 'V').forEach(col ->
                     processingQueue.add(Cell.builder()
@@ -83,7 +86,6 @@ public class FormulaResolver {
 
         try {
             Bindings bindings = engine.createBindings();
-            bindings.put("DAYS_IN_MONTH", LocalDate.now().lengthOfMonth());
             bindings.put("BALANCE", cell.getTxn().getTxn().getAccount().getBalance() / 100.0);
 
             bindings.putAll(cache);
