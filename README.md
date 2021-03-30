@@ -2,7 +2,8 @@
 # Formula extension to Moneydance
 
 Enhance Moneydance transaction reminders with Excel formulas. Can be used to calculate e.g. payslip
-with variable bonuses and taxes, loans and interests with custom payment schedule, or any variable payment. 
+with variable bonuses and taxes, loans and interests with custom payment schedule, or any scheduled 
+payment with variable equations.
 
 This is an extension for [Moneydance personal finance application](https://moneydance.com).
 
@@ -16,16 +17,16 @@ Open dialog from menu Extensions / Formulas.
 ![screenshot](https://github.com/skarppi/moneydance-formula/raw/master/screenshot.png "Screenshot")
 
 Existing reminders can be included into Formula editor. Once added, transaction values can be
-edited by altering A * B + C components and then committed (Record Transaction). Source parameters can also be 
-persisted for later use (Store parameters as default).
+edited by altering A * B + C components and then committed (```Record Transaction```). Source parameters can be 
+persisted for later use (```Store parameters as default```).
 
 Supported formulas
 - Any python expression
-- Custom variables, check all by typing ```?``` or ```dir()```
+- Custom variables, check all from tooltip for input ```?``` or ```dir()```
   - Reference any cell similar to Excel: A1, B1, C1, V1, A2,...
   - DAYS_IN_MONTH number of days in the month of the payment. Useful when calculating interests.
-  - DAYS_IN_PREVIOUT_MONTH number of days in the month before the payment. Useful when calculating interests.
-  - BALANCE the balance of the selected category. Useful when calculating interests.
+  - DAYS_IN_PREVIOUS_MONTH number of days in the preceding month of the payment. Useful when calculating interests.
+  - BALANCE (current row), BALANCE1, BALANCE2,... the balance of the category.
 - % sign can be used, e.g. 1% equals 0.01
 
 ## Requirements
@@ -37,15 +38,15 @@ Supported formulas
 
 ## Deployments
 
-Alternatively use MockRunner to run the extension only in IDE.
+Alternatively use ```MockRunner``` to run the extension only in IDE.
 
-* Generate a key pair. This can be done by running "ant genkeys" from the "src"
+* Generate a key pair. This can be done by running ```ant genkeys``` from the ```src```
   directory.  You will be prompted for a passphrase that is used to
   encrypt the private key file.  Your new keys will be stored in the
-  priv_key and pub_key files.
-* To compile and package the extension, run "ant formula"
-  from the src directory.  After the extension is compiled and built,
+  ```priv_key``` and ```pub_key``` files.
+* To compile and package the extension, run ```ant formula```
+  from the ```src``` directory.  After the extension is compiled and built,
   you will be asked for the passphrase to your private key which will
   be used to sign the extension and place the new extension file in
-  the dist directory with the name formula.mxt.
+  the dist directory with the name ```formula.mxt```.
   
