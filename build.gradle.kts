@@ -103,5 +103,5 @@ task<JavaExec>("runFull") {
 }
 
 application {
-    mainClass.set("MockRunner")
+    mainClass.set("MainKt")
 }

@@ -38,13 +38,14 @@ Supported formulas
 
 ## Running
 
-Use ```MockRunner``` to run the extension only without full Moneydance GUI.
+By default, the extension is run without full Moneydance GUI for faster development cycle.
+The account book is read only in this mode with multiple other limitations.
 
 ```
 ./gradlew run
 ```
 
-Full Moneydance GUI can be started with:
+Full Moneydance GUI can be started when testing full functionality. 
 
 ```
 ./gradlew runFull
