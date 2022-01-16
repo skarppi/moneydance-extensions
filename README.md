@@ -31,22 +31,32 @@ Supported formulas
 
 ## Requirements
 
-* Moneydance 2020 or 2019
+* Moneydance 2019 or later
 * Use java version 11 at least
 * Add `extadmin.jar` and `moneydance-dev.jar` from the devkit to the lib folder
 * Copy `/Applications/Moneydance.app/Contents/Java/moneydance.jar` to `lib/moneydance-private.jar`.
 
+## Running
+
+Use ```MockRunner``` to run the extension only without full Moneydance GUI.
+
+```
+./gradlew run
+```
+
+Full Moneydance GUI can be started with:
+
+```
+./gradlew runFull
+```
+
 ## Deployments
 
-Alternatively use ```MockRunner``` to run the extension only in IDE.
+The first time a key pair must be generated for signing. This can be done by running ```./gradlew genKeys```.
+You will be prompted for a passphrase that is used to encrypt the private key file.
 
-* Generate a key pair. This can be done by running ```ant genkeys``` from the ```src```
-  directory.  You will be prompted for a passphrase that is used to
-  encrypt the private key file.  Your new keys will be stored in the
-  ```priv_key``` and ```pub_key``` files.
-* To compile and package the extension, run ```ant formula```
-  from the ```src``` directory.  After the extension is compiled and built,
-  you will be asked for the passphrase to your private key which will
-  be used to sign the extension and place the new extension file in
-  the dist directory with the name ```formula.mxt```.
+To compile, package, and deploy the extension, run ```./gradlew deploy```. 
+You will be asked for the passphrase to your private key which will
+be used to sign the extension. The new signed extension file is copied to 
+Moneydance extension folder.
   
