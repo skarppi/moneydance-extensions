@@ -6,7 +6,7 @@ import com.moneydance.modules.features.formula.MDApi
 import java.io.File
 import java.lang.Exception
 
-fun main(args: Array<String>) {
+fun main() {
     val book = File("./Mock.moneydance")
     require(book.exists(), { "Account book doesn not exist" })
 

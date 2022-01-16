@@ -6,7 +6,6 @@ import com.moneydance.modules.features.formula.MDApi.Companion.formatCurrency
 import com.moneydance.modules.features.formula.MDApi
 import javax.swing.JPanel
 import com.infinitekind.moneydance.model.Reminder
-import com.infinitekind.moneydance.model.ParentTxn
 import javax.swing.JTable
 import javax.swing.JLabel
 import java.lang.RuntimeException
@@ -14,26 +13,23 @@ import java.awt.BorderLayout
 import com.moneydance.util.UiUtil
 import javax.swing.BorderFactory
 import com.moneydance.apps.md.view.gui.MDAction
-import java.awt.event.ActionEvent
 import com.moneydance.apps.md.view.gui.EditRemindersWindow
 import java.awt.GridBagLayout
 import javax.swing.JButton
 import com.moneydance.awt.GridC
 import javax.swing.JScrollPane
-import javax.swing.event.TableModelEvent
 import com.moneydance.modules.features.formula.split.FormulaSplitTxn
 import java.util.stream.Collectors
 import java.awt.event.MouseEvent
 import java.util.function.ToLongFunction
-import java.util.stream.IntStream
 import javax.swing.SwingConstants
 
 class ReminderDetails(private val api: MDApi) : JPanel() {
     private var reminder: Reminder? = null
-    private var parentTxn: ParentTxn? = null
-    private val tableModel: ReminderDetailsTableModel = ReminderDetailsTableModel()
+
+    private val tableModel = ReminderDetailsTableModel()
     private val txTable: JTable
-    private var summaryLabel: JLabel? = null
+    private val summaryLabel = JLabel("", SwingConstants.RIGHT)
 
     init {
         txTable = object : JTable(tableModel) {
@@ -42,13 +38,13 @@ class ReminderDetails(private val api: MDApi) : JPanel() {
                 val p = e.point
                 val rowIndex = rowAtPoint(p)
                 val colIndex = columnAtPoint(p)
-                try {
-                    return tableModel.getTooltipAt(rowIndex, colIndex)
+                return try {
+                    tableModel.getTooltipAt(rowIndex, colIndex)
                 } catch (e1: RuntimeException) {
                     //catch null pointer exception if mouse is over an empty line
                     e1.printStackTrace()
                     println(e1)
-                    return ""
+                    ""
                 }
             }
         }
@@ -61,17 +57,23 @@ class ReminderDetails(private val api: MDApi) : JPanel() {
             null,
             "Edit reminder",
             "E"
-        ) { evt: ActionEvent? -> EditRemindersWindow.editReminder(null, api.gui, reminder) }
+        ) {
+            EditRemindersWindow.editReminder(null, api.gui, reminder)
+        }
         val recordAction = MDAction.makeNonKeyedAction(
             null,
             "Record Transaction",
             "R"
-        ) { evt: ActionEvent? -> recordTransaction() }
+        ) {
+            recordTransaction()
+        }
         val saveAction = MDAction.makeNonKeyedAction(
             null,
             "Store parameters as default",
             "R"
-        ) { evt: ActionEvent? -> storeSettings() }
+        ) {
+            storeSettings()
+        }
         layout = GridBagLayout()
         add(JButton(editAction), GridC.getc(0, 0).west())
         add(JButton(saveAction), GridC.getc(1, 0).west())
@@ -80,46 +82,51 @@ class ReminderDetails(private val api: MDApi) : JPanel() {
         add(summaryPanel(), GridC.getc(2, 2).east())
 
         // update summary after data changes
-        tableModel.addTableModelListener { e: TableModelEvent? -> summaryLabel!!.text = summaryText() }
+        tableModel.addTableModelListener { summaryLabel.text = summaryText() }
     }
+
+    private val splitCount: Int
+        get() = reminder?.transaction?.splitCount ?: 0
 
     fun setReminder(reminder: Reminder?) {
         this.reminder = reminder
-        parentTxn = reminder?.transaction
-        val splitCount = if (parentTxn != null) parentTxn!!.splitCount else 0
+
+        val splits = MutableList(splitCount) { i ->
+            FormulaSplitTxn(i, reminder!!.transaction.getSplit(i), tableModel.resolver)
+        }
         val nextPayment = if (reminder != null) parseDate(reminder.getNextOccurance(29991231)) else null
-        val resolver = tableModel.resolver
-        tableModel.setTransactions(
-            IntStream.range(0, splitCount)
-                .mapToObj { i: Int -> FormulaSplitTxn(i, parentTxn!!.getSplit(i), resolver) }
-                .collect(Collectors.toList()), nextPayment)
+        tableModel.setTransactions(splits, nextPayment)
     }
 
     fun storeSettings() {
-        for (i in 0 until parentTxn!!.splitCount) {
-            val formulaSplitTxn = tableModel.transactions[i]
-            formulaSplitTxn.syncSettings()
+        reminder?.let { reminder ->
+            for (i in 0 until splitCount) {
+                val formulaSplitTxn = tableModel.transactions[i]
+                formulaSplitTxn.syncSettings()
+            }
+            reminder.syncItem()
+            tableModel.fireTableRowsUpdated(0, splitCount)
         }
-        reminder!!.syncItem()
-        tableModel.fireTableRowsUpdated(0, parentTxn!!.splitCount)
     }
 
     fun recordTransaction() {
-        val txns = book.transactionSet
-        val date = reminder!!.getNextOccurance(29991231)
-        val newTxn = parentTxn!!.duplicateAsNew()
-        newTxn.dateInt = date
-        newTxn.taxDateInt = date
-        newTxn.dateEntered = System.currentTimeMillis()
-        for (i in 0 until newTxn.splitCount) {
-            val formulaSplitTxn = tableModel.transactions[i]
-            val split = newTxn.getSplit(i)
-            split.setAmount(formulaSplitTxn.amount, formulaSplitTxn.amount)
-            split.description = formulaSplitTxn.description
+        reminder?.let { reminder ->
+            val txns = book.transactionSet
+            val date = reminder.getNextOccurance(29991231)
+            val newTxn = reminder.transaction.duplicateAsNew()
+            newTxn.dateInt = date
+            newTxn.taxDateInt = date
+            newTxn.dateEntered = System.currentTimeMillis()
+            for (i in 0 until newTxn.splitCount) {
+                val formulaSplitTxn = tableModel.transactions[i]
+                val split = newTxn.getSplit(i)
+                split.setAmount(formulaSplitTxn.amount, formulaSplitTxn.amount)
+                split.description = formulaSplitTxn.description
+            }
+            txns.addNewTxn(newTxn)
+            reminder.setAcknowledgedInt(date)
+            reminder.syncItem()
         }
-        txns.addNewTxn(newTxn)
-        reminder!!.setAcknowledgedInt(date)
-        reminder!!.syncItem()
     }
 
     private fun summaryText(): String {
@@ -134,7 +141,6 @@ class ReminderDetails(private val api: MDApi) : JPanel() {
     }
 
     private fun summaryPanel(): JPanel {
-        summaryLabel = JLabel("", SwingConstants.RIGHT)
         val panel = JPanel(GridBagLayout())
         panel.add(summaryLabel, GridC.getc(0, 0).fillboth().east())
         return panel

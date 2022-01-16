@@ -58,7 +58,7 @@ class MDApi(context: FeatureModuleContext, val gui: MoneydanceGUI) {
 
         @JvmStatic
         fun parseDate(date: Int): LocalDate {
-            return LocalDate.parse(Integer.toString(date), formatter)
+            return LocalDate.parse(date.toString(), formatter)
         }
 
         @JvmStatic

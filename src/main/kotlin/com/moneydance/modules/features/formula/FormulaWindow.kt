@@ -17,11 +17,10 @@ import javax.swing.Box
 
 /** Window used for Formula interface  */
 class FormulaWindow(api: MDApi) : JFrame("Formulas"), OKButtonListener {
-    private val reminderList: ReminderList
+    private val reminderList = ReminderList(api)
 
     init {
         val reminderDetails = ReminderDetails(api)
-        reminderList = ReminderList(api)
         reminderList.addSelectionListener { selected -> reminderDetails.setReminder(selected) }
         val p = JPanel(GridBagLayout())
         p.border = BorderFactory.createEmptyBorder(

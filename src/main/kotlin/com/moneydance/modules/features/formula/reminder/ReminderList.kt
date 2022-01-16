@@ -20,7 +20,7 @@ import javax.swing.JButton
 import com.moneydance.awt.GridC
 
 class ReminderList(private val api: MDApi) : JPanel() {
-    private val tableModel: RemindersListTableModel = RemindersListTableModel(api)
+    private val tableModel = RemindersListTableModel(api)
     private val reminderTable: JTable
     private val comboBoxModel = DefaultComboBoxModel<Reminder>()
 
@@ -35,24 +35,22 @@ class ReminderList(private val api: MDApi) : JPanel() {
             UiUtil.DLG_VGAP * 2, UiUtil.HGAP
         )
         add(JScrollPane(reminderTable), BorderLayout.CENTER)
-        add(buildButtonPanel(api), BorderLayout.SOUTH)
+        add(buildButtonPanel(), BorderLayout.SOUTH)
     }
 
     fun reload() {
         tableModel.setReminders(api.getReminders(true))
     }
 
-    private val selection = reminderTable.selectionModel
-
     fun addSelectionListener(listener: (Reminder?) -> Unit) {
-        selection.addListSelectionListener { event: ListSelectionEvent ->
+        reminderTable.selectionModel.addListSelectionListener { event: ListSelectionEvent ->
             if (!event.valueIsAdjusting) {
-                listener(selectedRow)
+                listener(selectedReminder)
             }
         }
     }
 
-    private fun buildButtonPanel(api: MDApi): JPanel {
+    private fun buildButtonPanel(): JPanel {
         val gui = api.gui
         val addAction = MDAction.makeIconAction(
             gui,
@@ -62,7 +60,7 @@ class ReminderList(private val api: MDApi) : JPanel() {
             comboBoxModel.addAll(api.getReminders(false))
             if (comboBoxModel.size > 0) {
                 val index = tableModel.insert()
-                selection.setSelectionInterval(index, index)
+                reminderTable.selectionModel.setSelectionInterval(index, index)
             }
         }
         val removeAction = MDAction.makeIconAction(
@@ -72,7 +70,7 @@ class ReminderList(private val api: MDApi) : JPanel() {
             val selectedRow = reminderTable.selectedRow
             if (selectedRow >= 0) {
                 tableModel.remove(selectedRow)
-                selection.clearSelection()
+                reminderTable.selectionModel.clearSelection()
             }
         }
         val buttonPanel = JPanel(GridBagLayout())
@@ -81,7 +79,7 @@ class ReminderList(private val api: MDApi) : JPanel() {
         return buttonPanel
     }
 
-    val selectedRow: Reminder?
+    private val selectedReminder: Reminder?
         get() {
             val selectedRow = reminderTable.selectedRow
             return if (selectedRow >= 0) {

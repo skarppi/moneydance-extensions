@@ -76,12 +76,10 @@ class ReminderDetailsTableModel : AbstractTableModel() {
         }
         val value = aValue as String
         val txn = transactions[rowIndex]
-        if (columnIndex == 2) {
-            txn.a = value
-        } else if (columnIndex == 3) {
-            txn.b = value
-        } else if (columnIndex == 4) {
-            txn.c = value
+        when (columnIndex) {
+            2 -> txn.a = value
+            3 -> txn.b = value
+            4 -> txn.c = value
         }
         transactions[rowIndex] = txn
         invalidate()

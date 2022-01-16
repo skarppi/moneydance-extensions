@@ -5,17 +5,12 @@ import com.moneydance.modules.features.formula.MDApi.Companion.enableReminder
 import com.moneydance.modules.features.formula.MDApi
 import javax.swing.table.AbstractTableModel
 import com.infinitekind.moneydance.model.Reminder
-import com.infinitekind.util.CustomDateFormat
 import java.util.ArrayList
 
 class RemindersListTableModel(api: MDApi) : AbstractTableModel() {
     private val NEW_ENTRY = Reminder(null)
     private var reminders: MutableList<Reminder> = ArrayList()
-    private val dateFormat: CustomDateFormat
-
-    init {
-        dateFormat = api.shortDateFormatter
-    }
+    private val dateFormat = api.shortDateFormatter
 
     fun setReminders(reminders: List<Reminder>) {
         this.reminders = reminders.toMutableList()

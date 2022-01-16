@@ -2,14 +2,11 @@ package com.moneydance.modules.features.formula.split
 
 import com.moneydance.modules.features.formula.MDApi.Companion.log
 import java.time.LocalDate
-import java.util.stream.Collectors
 import javax.script.ScriptException
 import javax.script.ScriptEngineManager
 import java.lang.Exception
 import java.util.*
-import java.util.function.Consumer
 import java.util.regex.Pattern
-import java.util.stream.IntStream
 
 class FormulaResolver {
 
@@ -52,26 +49,23 @@ class FormulaResolver {
         transactions: List<FormulaSplitTxn>,
         nextPayment: LocalDate?
     ): Queue<Cell> {
-        val processingQueue: Queue<Cell> = LinkedList()
-        IntStream.rangeClosed(1, transactions.size).forEach { row: Int ->
+        val processingQueue = LinkedList<Cell>()
+        for (row in 1 until transactions.size) {
             val split = transactions[row - 1]
             cache["BALANCE$row"] = split.txn.account.balance / 100.0
             nextPayment?.let { date ->
                 cache["DAYS_IN_PREVIOUS_MONTH"] = date.minusMonths(1).lengthOfMonth()
                 cache["DAYS_IN_MONTH"] = date.lengthOfMonth()
             }
-            Arrays.asList('A', 'B', 'C', 'V').forEach(
-                Consumer { col: Char? ->
-                    processingQueue.add(
-                        Cell(
-                            col!!,
-                            row,
-                            split,
-                            ArrayList()
-                        )
+            listOf('A', 'B', 'C', 'V').forEach { col ->
+                processingQueue.add(
+                    Cell(
+                        col = col,
+                        row = row,
+                        txn = split
                     )
-                }
-            )
+                )
+            }
         }
         return processingQueue
     }
@@ -83,14 +77,15 @@ class FormulaResolver {
             bindings["BALANCE"] = cell.txn.txn.account.balance / 100.0
             bindings.putAll(cache)
             if (script == "?") {
-                bindings.keys.stream().sorted().collect(Collectors.toList()).toString()
+                bindings.keys.sorted().toString()
             } else engine.eval(script.replace("%", "/100.0"), bindings)
         } catch (e: ScriptException) {
             log("Failed to evaluate script $script", e)
-            if (e.message!!.startsWith("TypeError:")) {
+            val message = e.message ?: return null
+            if (message.startsWith("TypeError:")) {
                 return "#N/A!"
             }
-            if (e.message!!.startsWith("NameError:")) {
+            if (message.startsWith("NameError:")) {
                 val maxRow: Int = cell.txn.txn.parentTxn.splitCount
                 val p = Pattern.compile("'([A-C,V][1-$maxRow])'")
                 val matcher = p.matcher(e.message)
@@ -98,12 +93,12 @@ class FormulaResolver {
                     "#NAME? " + matcher.group(1)
                 } else "#NAME?"
             }
-            if (e.message!!.startsWith("ZeroDivisionError:")) {
+            if (message.startsWith("ZeroDivisionError:")) {
                 return "#DIV/0!"
             }
-            if (e.message!!.startsWith("SyntaxError:")) {
+            if (message.startsWith("SyntaxError:")) {
                 "#NUM!"
-            } else e.message
+            } else message
         } catch (e: Exception) {
             log("Failed to evaluate script $script", e)
             e.message

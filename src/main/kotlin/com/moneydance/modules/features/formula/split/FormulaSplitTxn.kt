@@ -4,8 +4,9 @@ import com.moneydance.modules.features.formula.MDApi.Companion.formatCurrency
 import com.infinitekind.moneydance.model.SplitTxn
 import org.apache.commons.lang3.StringUtils
 import java.math.BigInteger
+import kotlin.math.roundToLong
 
-class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, val resolver: FormulaResolver) {
+class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, private val resolver: FormulaResolver) {
     var a: String? = txn.getParameter("formula_a")
     var b: String? = txn.getParameter("formula_b")
     var c: String? = txn.getParameter("formula_c")
@@ -97,18 +98,13 @@ class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, val resolv
 
     companion object {
         fun toCents(value: Any?): Long? {
-            return if (value is Double) {
-                Math.round(100 * value)
-            } else if (value is Float) {
-                Math.round(100 * value).toLong()
-            } else if (value is Long) {
-                100 * value
-            } else if (value is Int) {
-                (100 * value).toLong()
-            } else if (value is BigInteger) {
-                100 * value.toLong()
-            } else {
-                null
+            return when (value) {
+                is Double -> (100 * value).roundToLong()
+                is Float -> (100 * value).roundToLong()
+                is Long -> 100 * value
+                is Int -> (100 * value).toLong()
+                is BigInteger -> 100 * value.toLong()
+                else -> null
             }
         }
     }
