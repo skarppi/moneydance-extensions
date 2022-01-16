@@ -69,13 +69,12 @@ public class FormulaResolver {
             cache.put("DAYS_IN_MONTH", nextPayment.lengthOfMonth());
 
             Arrays.asList('A', 'B', 'C', 'V').forEach(col ->
-                    processingQueue.add(Cell.builder()
-                            .cell("" + col + row)
-                            .col(col)
-                            .row(row)
-                            .txn(split)
-                            .deps(new ArrayList())
-                            .build())
+                    processingQueue.add(new Cell(
+                            col,
+                            row,
+                            split,
+                            new ArrayList<>())
+                    )
             );
         });
         return processingQueue;
