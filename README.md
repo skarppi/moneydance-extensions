@@ -33,8 +33,11 @@ Supported formulas
 
 * Moneydance 2019 or later
 * Use java version 11 at least
-* Add `extadmin.jar` and `moneydance-dev.jar` from the devkit to the lib folder
-* Copy `/Applications/Moneydance.app/Contents/Java/moneydance.jar` to `lib/moneydance-private.jar`.
+* Download and extract required libraries from the devkit to the lib folder.
+
+```
+./gradlew fetchLibs
+```
 
 ## Running
 
