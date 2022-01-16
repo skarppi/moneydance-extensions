@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
-    val api = MDApi(main) { MoneydanceGUI(main) }
+    val api = MDApi(main, MoneydanceGUI(main))
     val formulaWindow = FormulaWindow(api)
     formulaWindow.isVisible = true
 }

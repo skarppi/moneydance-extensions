@@ -60,7 +60,7 @@ public class ReminderDetails extends JPanel {
         MDAction editAction = MDAction.makeNonKeyedAction(null,
                 "Edit reminder",
                 "E",
-                evt -> EditRemindersWindow.editReminder(null, mdApi.getGUI(), reminder)
+                evt -> EditRemindersWindow.editReminder(null, mdApi.getGui(), reminder)
         );
 
         MDAction recordAction = MDAction.makeNonKeyedAction(null,

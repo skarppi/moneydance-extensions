@@ -10,18 +10,16 @@ import javax.imageio.ImageIO
 class Main : FeatureModule() {
 
     private var formulaWindow: FormulaWindow? = null
-    private var model: MDApi? = null
+
     override fun init() {
         // the first thing we will do is register this module to be invoked
         // via the application toolbar
-        val context = context as com.moneydance.apps.md.controller.Main
         context.registerFeature(
             this,
             "open",
             getIcon("icon"),
             name
         )
-        model = MDApi(context) { context.ui as MoneydanceGUI }
     }
 
     override fun cleanup() {
@@ -48,7 +46,10 @@ class Main : FeatureModule() {
     @Synchronized
     private fun showWindow() {
         if (formulaWindow == null) {
-            formulaWindow = FormulaWindow(model)
+            val context = context as com.moneydance.apps.md.controller.Main
+            val api = MDApi(context, context.ui as MoneydanceGUI)
+
+            formulaWindow = FormulaWindow(api)
             formulaWindow!!.isVisible = true
         } else {
             formulaWindow!!.reload()

@@ -57,7 +57,7 @@ public class ReminderList extends JPanel {
     }
 
     private JPanel buildButtonPanel(MDApi api) {
-        MoneydanceGUI gui = api.getGUI();
+        MoneydanceGUI gui = api.getGui();
         MDAction addAction = MDAction.makeIconAction(gui,
                 gui.getIcon(MDImages.PLUS),
                 evt -> {
