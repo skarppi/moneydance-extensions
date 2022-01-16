@@ -4,7 +4,7 @@ data class Cell(
     val col: Char, // column starting from A
     val row: Int, // row number starting from 1
     val txn: FormulaSplitTxn,
-    val deps: List<String> = ArrayList()
+    val deps: MutableList<String> = ArrayList()
 ) {
     val cell: String
         get() {

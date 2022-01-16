@@ -20,9 +20,8 @@ class MDApi(context: FeatureModuleContext, val gui: MoneydanceGUI) {
     }
 
     fun getReminders(isFormulaEnabled: Boolean): List<Reminder> {
-        return book.reminders.allReminders.stream()
+        return book.reminders.allReminders
             .filter { reminder: Reminder -> isFormulaEnabled == reminder.getBooleanParameter(ENABLED_KEY, false) }
-            .collect(Collectors.toList())
     }
 
     val shortDateFormatter: CustomDateFormat
