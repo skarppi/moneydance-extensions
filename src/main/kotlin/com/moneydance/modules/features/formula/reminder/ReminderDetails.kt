@@ -1,9 +1,8 @@
 package com.moneydance.modules.features.formula.reminder
 
-import com.moneydance.modules.features.formula.MDApi.Companion.parseDate
-import com.moneydance.modules.features.formula.MDApi.Companion.book
-import com.moneydance.modules.features.formula.MDApi.Companion.formatCurrency
-import com.moneydance.modules.features.formula.MDApi
+import com.moneydance.modules.features.MDApi.Companion.parseDate
+import com.moneydance.modules.features.MDApi.Companion.formatCurrency
+import com.moneydance.modules.features.MDApi
 import javax.swing.JPanel
 import com.infinitekind.moneydance.model.Reminder
 import javax.swing.JTable
@@ -111,7 +110,7 @@ class ReminderDetails(private val api: MDApi) : JPanel() {
 
     fun recordTransaction() {
         reminder?.let { reminder ->
-            val txns = book.transactionSet
+            val txns = api.book.transactionSet
             val date = reminder.getNextOccurance(29991231)
             val newTxn = reminder.transaction.duplicateAsNew()
             newTxn.dateInt = date

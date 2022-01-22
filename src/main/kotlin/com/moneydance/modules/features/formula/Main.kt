@@ -2,6 +2,7 @@ package com.moneydance.modules.features.formula
 
 import com.moneydance.apps.md.controller.FeatureModule
 import com.moneydance.apps.md.view.gui.MoneydanceGUI
+import com.moneydance.modules.features.MDApi
 import java.awt.Image
 import javax.imageio.ImageIO
 

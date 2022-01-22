@@ -1,22 +1,34 @@
-package com.moneydance.modules.features.formula
+package com.moneydance.modules.features
 
-import com.moneydance.apps.md.controller.FeatureModuleContext
-import com.moneydance.apps.md.view.gui.MoneydanceGUI
-import com.moneydance.modules.features.formula.MDApi
-import com.infinitekind.moneydance.model.Reminder
-import java.util.stream.Collectors
-import java.time.format.DateTimeFormatter
-import com.infinitekind.moneydance.model.AccountBook
-import com.moneydance.apps.md.controller.UserPreferences
-import com.infinitekind.moneydance.model.CurrencyType
+import com.infinitekind.moneydance.model.*
 import com.infinitekind.util.CustomDateFormat
+import com.moneydance.apps.md.controller.FeatureModuleContext
+import com.moneydance.apps.md.controller.UserPreferences
+import com.moneydance.apps.md.view.gui.MoneydanceGUI
 import java.time.LocalDate
-import java.util.function.Supplier
-import kotlin.jvm.JvmOverloads
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class MDApi(context: FeatureModuleContext, val gui: MoneydanceGUI) {
+class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     init {
-        Companion.context = context
+        Companion.baseCurrencyType = book.currencies.baseType
+    }
+
+    fun getInvestmentTransactions(accountName: String): TxnSet {
+        val account = context.rootAccount.getAccountByName(accountName, Account.AccountType.INVESTMENT)
+        return book.transactionSet.getTransactionsForAccount(account)
+    }
+
+    val dateTimeFormat: String
+        get() = gui.preferences.shortDateFormat + " " + gui.preferences.timeFormat
+
+    private val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+
+    val book: AccountBook
+        get() = context.currentAccountBook
+
+    fun toDate(date: LocalDateTime): Int {
+        return date.format(formatter).toInt()
     }
 
     fun getReminders(isFormulaEnabled: Boolean): List<Reminder> {
@@ -29,31 +41,15 @@ class MDApi(context: FeatureModuleContext, val gui: MoneydanceGUI) {
 
     companion object {
         const val ENABLED_KEY = "formula"
-        private var context: FeatureModuleContext? = null
+        private var baseCurrencyType: CurrencyType? = null
         private val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-        @JvmStatic
-        val book: AccountBook
-            get() = context!!.currentAccountBook
-
-        @JvmStatic
-        fun enableReminder(reminder: Reminder) {
-            reminder.setParameter(ENABLED_KEY, true)
-            reminder.syncItem()
-        }
-
-        @JvmStatic
-        fun disableReminder(reminder: Reminder) {
-            reminder.removeParameter(ENABLED_KEY)
-            reminder.syncItem()
-        }
 
         val decimalChar: Char
             get() = UserPreferences.getInstance().decimalChar
 
         @JvmStatic
         fun formatCurrency(value: Long): String {
-            val currencyType = book.currencies.baseType
-            return currencyType.formatFancy(value, decimalChar)
+            return baseCurrencyType!!.formatFancy(value, decimalChar)
         }
 
         @JvmStatic

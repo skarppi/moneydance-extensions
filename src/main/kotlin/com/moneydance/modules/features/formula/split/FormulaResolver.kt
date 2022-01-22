@@ -1,6 +1,6 @@
 package com.moneydance.modules.features.formula.split
 
-import com.moneydance.modules.features.formula.MDApi.Companion.log
+import com.moneydance.modules.features.MDApi.Companion.log
 import java.time.LocalDate
 import javax.script.ScriptException
 import javax.script.ScriptEngineManager

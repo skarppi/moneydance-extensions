@@ -1,8 +1,6 @@
 package com.moneydance.modules.features.formula.reminder
 
-import com.moneydance.modules.features.formula.MDApi.Companion.disableReminder
-import com.moneydance.modules.features.formula.MDApi.Companion.enableReminder
-import com.moneydance.modules.features.formula.MDApi
+import com.moneydance.modules.features.MDApi
 import javax.swing.table.AbstractTableModel
 import com.infinitekind.moneydance.model.Reminder
 import java.util.ArrayList
@@ -30,7 +28,9 @@ class RemindersListTableModel(api: MDApi) : AbstractTableModel() {
 
     fun remove(index: Int) {
         val removed = reminders.removeAt(index)
-        disableReminder(removed)
+        removed.removeParameter(MDApi.ENABLED_KEY)
+        removed.syncItem()
+
         fireTableRowsDeleted(index, index)
     }
 
@@ -66,7 +66,9 @@ class RemindersListTableModel(api: MDApi) : AbstractTableModel() {
             return
         }
         val reminder = aValue as Reminder
-        enableReminder(reminder)
+        reminder.setParameter(MDApi.ENABLED_KEY, true)
+        reminder.syncItem()
+
         reminders[rowIndex] = reminder
         fireTableRowsUpdated(rowIndex, rowIndex)
     }

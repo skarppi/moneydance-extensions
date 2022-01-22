@@ -2,7 +2,7 @@ import com.moneydance.apps.md.controller.AccountBookWrapper
 import com.moneydance.apps.md.controller.Main
 import com.moneydance.apps.md.view.gui.MoneydanceGUI
 import com.moneydance.modules.features.formula.FormulaWindow
-import com.moneydance.modules.features.formula.MDApi
+import com.moneydance.modules.features.MDApi
 import java.io.File
 import java.lang.Exception
 

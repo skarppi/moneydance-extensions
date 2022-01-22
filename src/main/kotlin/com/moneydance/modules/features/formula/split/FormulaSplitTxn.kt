@@ -1,6 +1,6 @@
 package com.moneydance.modules.features.formula.split
 
-import com.moneydance.modules.features.formula.MDApi.Companion.formatCurrency
+import com.moneydance.modules.features.MDApi.Companion.formatCurrency
 import com.infinitekind.moneydance.model.SplitTxn
 import org.apache.commons.lang3.StringUtils
 import java.math.BigInteger

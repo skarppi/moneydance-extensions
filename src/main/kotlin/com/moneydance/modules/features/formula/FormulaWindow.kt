@@ -12,6 +12,7 @@ import com.moneydance.awt.GridC
 import com.moneydance.apps.md.view.gui.OKButtonPanel
 import java.awt.event.WindowEvent
 import com.moneydance.awt.AwtUtil
+import com.moneydance.modules.features.MDApi
 import java.awt.AWTEvent
 import javax.swing.Box
 

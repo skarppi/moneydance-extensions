@@ -1,6 +1,6 @@
 package com.moneydance.modules.features.formula.reminder
 
-import com.moneydance.modules.features.formula.MDApi
+import com.moneydance.modules.features.MDApi
 import javax.swing.JPanel
 import javax.swing.JTable
 import javax.swing.DefaultComboBoxModel
