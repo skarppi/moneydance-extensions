@@ -2,8 +2,8 @@
   "vendor" = "Juho Kolehmainen"
   "module_build" = "1"
   "minbuild" = "1000"
-  "vendor.url" = "https://github.com/skarppi/moneydance-formula"
-  "module_name" = "reminder_formula"
+  "vendor.url" = "https://github.com/skarppi/moneydance-extensions"
+  "module_name" = "formula"
   "module_desc" = "<html><body><title>Reminder Formula</title><p>Add formulas to Moneydance transaction reminders.</p></body></html>"
   "desc" = "Add formulas to Moneydance transaction reminders"
 }

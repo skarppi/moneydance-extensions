@@ -1,20 +1,21 @@
+# Moneydance Extension
 
-# Formula extension to Moneydance
+Extensions in this repository are for [Moneydance personal finance application](https://moneydance.com).
+
+To develop and build you'll need the Moneydance Developer Kit and
+documentation which is available at [developer site](https://infinitekind.com/developer).
+
+## Formula extension to Moneydance
 
 Enhance Moneydance transaction reminders with Excel formulas. Can be used to calculate e.g. payslip
 with variable bonuses and taxes, loans and interests with custom payment schedule, or any scheduled 
 payment with variable equations.
 
-This is an extension for [Moneydance personal finance application](https://moneydance.com).
-
-To develop and build you'll need the Moneydance Developer Kit and 
-documentation which is available at [developer site](https://infinitekind.com/developer).
-
-## Usage
+### Usage
 
 Open dialog from menu Extensions / Formulas.
 
-![screenshot](https://github.com/skarppi/moneydance-formula/raw/master/screenshot.png "Screenshot")
+![screenshot](https://github.com/skarppi/moneydance-extensions/raw/master/screenshot.png "Screenshot")
 
 Existing reminders can be included into Formula editor. Once added, transaction values can be
 edited by altering A * B + C components and then committed (```Record Transaction```). Source parameters can be 
@@ -41,17 +42,17 @@ Supported formulas
 
 ## Running
 
-By default, the extension is run without full Moneydance GUI for faster development cycle.
+By default, extensions are run without full Moneydance GUI for faster development cycle.
 The account book is read only in this mode with multiple other limitations.
 
 ```
-./gradlew run
+./gradlew :formula:run
 ```
 
 Full Moneydance GUI can be started when testing full functionality. 
 
 ```
-./gradlew runFull
+./gradlew deployUnsigned :run
 ```
 
 ## Deployments
