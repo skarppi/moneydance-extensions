@@ -30,6 +30,10 @@ Supported formulas
   - BALANCE (current row), BALANCE1, BALANCE2,... the balance of the category.
 - % sign can be used, e.g. 1% equals 0.01
 
+## Crypto Importer
+
+Import cryptocurrency transactions from [Binance](https://binance.com).
+
 ## Requirements
 
 * Moneydance 2019 or later
@@ -47,6 +51,7 @@ The account book is read only in this mode with multiple other limitations.
 
 ```
 ./gradlew :formula:run
+./gradlew :crypto:run
 ```
 
 Full Moneydance GUI can be started when testing full functionality. 
@@ -57,11 +62,13 @@ Full Moneydance GUI can be started when testing full functionality.
 
 ## Deployments
 
-The first time a key pair must be generated for signing. This can be done by running ```./gradlew genKeys```.
-You will be prompted for a passphrase that is used to encrypt the private key file.
+The first time a key pair must be generated for signing. You will be prompted
+for a passphrase that is used to encrypt the private key file and later
+sign the extension on deployment.
 
-To compile, package, and deploy the extension, run ```./gradlew deploy```. 
-You will be asked for the passphrase to your private key which will
-be used to sign the extension. The new signed extension file is copied to 
+```./gradlew genKeys```
+
+To compile, package, and deploy the extension. The new signed extension file is copied to
 Moneydance extension folder.
-  
+
+```./gradlew formula:deploy```

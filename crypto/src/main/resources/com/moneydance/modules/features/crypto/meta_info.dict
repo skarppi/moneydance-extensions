@@ -1,0 +1,9 @@
+{
+  "vendor" = "Juho Kolehmainen"
+  "module_build" = "1"
+  "minbuild" = "1000"
+  "vendor.url" = "https://github.com/skarppi/moneydance-extensions"
+  "module_name" = "crypto"
+  "module_desc" = "<html><body><title>Crypto Importer</title><p>Import Binance transactions and calculate taxes.</p></body></html>"
+  "desc" = "Import Crypto transactions from Binance"
+}

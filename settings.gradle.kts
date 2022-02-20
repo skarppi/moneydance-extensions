@@ -1,4 +1,4 @@
 
 rootProject.name = "md-extensions"
 
-include("common", "formula")
+include("common", "formula", "crypto")
