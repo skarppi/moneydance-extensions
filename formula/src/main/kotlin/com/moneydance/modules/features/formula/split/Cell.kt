@@ -1,7 +1,12 @@
 package com.moneydance.modules.features.formula.split
 
+// column starting from A
+enum class CellCol {
+    A, B, C, V
+}
+
 data class Cell(
-    val col: Char, // column starting from A
+    val col: CellCol,
     val row: Int, // row number starting from 1
     val txn: FormulaSplitTxn,
     val deps: MutableList<String> = ArrayList()

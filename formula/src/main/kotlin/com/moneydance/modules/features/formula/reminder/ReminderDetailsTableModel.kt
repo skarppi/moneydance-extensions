@@ -1,5 +1,6 @@
 package com.moneydance.modules.features.formula.reminder
 
+import com.moneydance.modules.features.formula.split.CellCol
 import javax.swing.table.AbstractTableModel
 import com.moneydance.modules.features.formula.split.FormulaSplitTxn
 import java.time.LocalDate
@@ -59,9 +60,9 @@ class ReminderDetailsTableModel : AbstractTableModel() {
 
     fun getTooltipAt(rowIndex: Int, columnIndex: Int): String {
         return when (columnIndex) {
-            2 -> resolver.getValue("A", rowIndex).toString()
-            3 -> resolver.getValue("B", rowIndex).toString()
-            4 -> resolver.getValue("C", rowIndex).toString()
+            2 -> resolver.getValue(CellCol.A, rowIndex).toString()
+            3 -> resolver.getValue(CellCol.B, rowIndex).toString()
+            4 -> resolver.getValue(CellCol.C, rowIndex).toString()
             else -> ""
         }
     }

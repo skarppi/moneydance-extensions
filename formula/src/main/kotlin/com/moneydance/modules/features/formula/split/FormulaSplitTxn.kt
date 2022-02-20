@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils
 import java.math.BigInteger
 import kotlin.math.roundToLong
 
-class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, private val resolver: FormulaResolver) {
+class FormulaSplitTxn(val splitIndex: Int, val txn: SplitTxn, private val resolver: FormulaResolver) {
     var a: String? = txn.getParameter("formula_a")
     var b: String? = txn.getParameter("formula_b")
     var c: String? = txn.getParameter("formula_c")
@@ -25,7 +25,7 @@ class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, private va
         } else formula
     }
 
-    private fun formula(): String? {
+    private fun valueFormula(): String? {
         val add = if (StringUtils.isNoneBlank(c)) "+$c" else ""
         return if (StringUtils.isNoneBlank(a) && StringUtils.isNoneBlank(b)) {
             addParentheses(a!!) + "*" + addParentheses(b!!) + add
@@ -45,10 +45,11 @@ class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, private va
             val value = toCents(resolver.getValue(splitIndex))
             return value ?: txn.value
         }
+
     val description: String
         get() {
             var description = txn.description
-            val formula = formula()
+            val formula = valueFormula()
             if (formula != null) {
                 description += " ($formula)"
             }
@@ -86,13 +87,12 @@ class FormulaSplitTxn(private val splitIndex: Int, val txn: SplitTxn, private va
         return txn.description
     }
 
-    fun getCellSource(col: Char): String? {
+    fun getCellSource(col: CellCol): String? {
         return when (col) {
-            'A' -> a
-            'B' -> b
-            'C' -> c
-            'V' -> formula()
-            else -> null
+            CellCol.A -> a
+            CellCol.B -> b
+            CellCol.C -> c
+            CellCol.V -> valueFormula()
         }
     }
 
