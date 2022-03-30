@@ -23,7 +23,6 @@ import java.awt.event.MouseEvent
 class TransactionList(private val api: MDApi) : JPanel() {
     private val tableModel = TransactionListTableModel(api)
     private val reminderTable: JTable
-    private val comboBoxModel = DefaultComboBoxModel<Reminder>()
 
     init {
         reminderTable = object : JTable(tableModel) {
@@ -50,7 +49,12 @@ class TransactionList(private val api: MDApi) : JPanel() {
         tableModel.setPositions(BinanceImporter(api).transactions())
 
         reminderTable.selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
-        reminderTable.columnModel.getColumn(0).cellEditor = DefaultCellEditor(JComboBox(comboBoxModel))
+        with(reminderTable.columnModel.getColumn(0)) {
+            minWidth = 175
+            maxWidth = 175
+        }
+        reminderTable.columnModel.getColumn(1).maxWidth = 100
+
         layout = BorderLayout(UiUtil.DLG_HGAP, UiUtil.DLG_VGAP)
         border = BorderFactory.createEmptyBorder(
             UiUtil.VGAP, UiUtil.HGAP,

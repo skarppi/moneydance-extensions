@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 
 class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     init {
-        Companion.baseCurrencyType = book.currencies.baseType
+        baseCurrencyType = book.currencies.baseType
     }
 
     fun getInvestmentTransactions(accountName: String): TxnSet {
@@ -41,30 +41,35 @@ class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
 
     companion object {
         const val ENABLED_KEY = "formula"
-        private var baseCurrencyType: CurrencyType? = null
+        var baseCurrencyType: CurrencyType? = null
         private val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
         val decimalChar: Char
             get() = UserPreferences.getInstance().decimalChar
 
-        @JvmStatic
         fun formatCurrency(value: Long): String {
             return baseCurrencyType!!.formatFancy(value, decimalChar)
         }
 
-        @JvmStatic
+        fun formatCurrency(value: Long, currencyType: CurrencyType): String {
+            return currencyType.formatFancy(value, decimalChar)
+        }
+
         fun parseDate(date: Int): LocalDate {
             return LocalDate.parse(date.toString(), formatter)
         }
 
-        @JvmStatic
-        @JvmOverloads
-        fun log(msg: String, error: Throwable? = null) {
-            println("moneydance-formula: $msg")
-            if (error != null) {
-                println(error.message)
-                //            error.printStackTrace();
-            }
+        fun logError(error: Throwable? = null) {
+            println("${StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).callerClass}: ${error?.message}")
+            error?.printStackTrace();
+        }
+
+        fun log(vararg vars:Any) {
+            vars.mapNotNull { v -> v as? Throwable }.map(this::logError)
+
+            val nonThrowables = vars.filterNot { v -> v is Throwable }
+
+            println("${StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).callerClass}: ${nonThrowables.joinToString(" ")}")
         }
     }
 }

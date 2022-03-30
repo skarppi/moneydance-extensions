@@ -1,5 +1,6 @@
 package com.moneydance.modules.features.crypto.ui
 
+import com.infinitekind.moneydance.model.ParentTxn
 import com.moneydance.modules.features.MDApi
 import com.moneydance.modules.features.crypto.model.CryptoTxn
 import java.time.format.DateTimeFormatter
@@ -21,17 +22,15 @@ class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
     }
 
     override fun getColumnCount(): Int {
-        return 6
+        return 4
     }
 
     override fun getColumnName(column: Int): String {
         return when (column) {
             0 -> "Date"
             1 -> "Account"
-            2 -> "Operation"
-            3 -> "Amount"
-            4 -> "Coin"
-            5 -> "Remark"
+            2 -> "Splits"
+            3 -> "Existing txn"
             else -> ""
         }
     }
@@ -41,10 +40,12 @@ class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
         return when (columnIndex) {
             0 -> dateTimeFormatter.format(txn.date)
             1 -> txn.account
-            2 -> txn.operation
-            3 -> txn.amount
-            4 -> txn.coin
-            5 -> txn.existingTxn?.toString()
+            2 -> txn.sourceLines.map { line ->
+                "${line.operation} - ${line.amount} - ${line.coin}"
+            }
+            3 -> {
+                txn.existingTxnStatus
+            }
             else -> null
         }
     }
@@ -62,7 +63,7 @@ class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
     fun doubleClickAt(rowIndex: Int, columnIndex: Int) {
         val txn = transactions[rowIndex]
         when (columnIndex) {
-            5 -> api.gui.showTxnInNewWindow(txn.existingTxn)
+            4 -> api.gui.showTxnInNewWindow(txn.existingTxn)
             else -> ""
         }
     }
