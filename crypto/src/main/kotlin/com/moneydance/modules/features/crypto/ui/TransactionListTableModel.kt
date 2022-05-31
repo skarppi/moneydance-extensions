@@ -1,10 +1,14 @@
 package com.moneydance.modules.features.crypto.ui
 
+import com.infinitekind.moneydance.model.AbstractTxn
 import com.infinitekind.moneydance.model.ParentTxn
+import com.infinitekind.moneydance.model.SplitTxn
 import com.moneydance.modules.features.MDApi
+import com.moneydance.modules.features.MDApi.Companion.SHARES_MULTIPLIER
+import com.moneydance.modules.features.MDApi.Companion.log
 import com.moneydance.modules.features.crypto.model.CryptoTxn
+import com.moneydance.modules.features.crypto.services.MDInvestments
 import java.time.format.DateTimeFormatter
-import java.util.*
 import javax.swing.table.AbstractTableModel
 
 class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
@@ -35,14 +39,19 @@ class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
         }
     }
 
+//    fun txnToString(txn: ParentTxn): String {
+//
+//    }
+//
+
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
         val txn = transactions[rowIndex]
         return when (columnIndex) {
             0 -> dateTimeFormatter.format(txn.date)
             1 -> txn.account
             2 -> txn.sourceLines.map { line ->
-                "${line.operation} - ${line.amount} - ${line.coin}"
-            }
+                "${line.operation}: ${line.amount} ${line.coin}"
+            }.joinToString(", ")
             3 -> {
                 txn.existingTxnStatus
             }
@@ -63,7 +72,15 @@ class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
     fun doubleClickAt(rowIndex: Int, columnIndex: Int) {
         val txn = transactions[rowIndex]
         when (columnIndex) {
-            4 -> api.gui.showTxnInNewWindow(txn.existingTxn)
+            3 -> {
+                //api.gui.showTxnInNewWindow(txn.existingTxn)
+                //println(txn.existingTxn)
+
+                when(txn.transferType()) {
+                    AbstractTxn.TRANSFER_TYPE_BUYSELL -> MDInvestments.buySell(txn, api)
+                    //AbstractTxn.TRANSFER_TYPE_BANK -> MDInvestments.transfer(txn, api)
+                }
+            }
             else -> ""
         }
     }

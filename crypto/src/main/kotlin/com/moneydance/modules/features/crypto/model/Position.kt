@@ -1,9 +1,8 @@
 package com.moneydance.modules.features.crypto.model
 
 import com.infinitekind.moneydance.model.AbstractTxn
-import com.infinitekind.moneydance.model.ParentTxn
-import com.moneydance.modules.features.crypto.importer.BinanceAccount
-import com.moneydance.modules.features.crypto.importer.BinanceOperation
+import com.moneydance.modules.features.crypto.services.BinanceAccount
+import com.moneydance.modules.features.crypto.services.BinanceOperation
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -28,6 +27,18 @@ data class BinanceTxn(
     val existingTxnStatus: String? = null
 ) {
     val cents get() = (amount * 100).toLong()
+
+    val description = when(coin) {
+        "ADA" -> "Cardano"
+        else -> coin
+    }
+
+    val moneydanceSubAccount = when(coin) {
+        "ADA" -> "${account.toMDAccount()}:Cardano"
+        else -> "${account.toMDAccount()}:$coin"
+    }
+
+    val memo = if (amount >= 0) "Osto2 ${amount}" else "Myynti2 ${amount}"
 }
 
 data class CryptoTxn(
@@ -39,7 +50,10 @@ data class CryptoTxn(
 //    val sellPrice: Float?,
     val existingTxn: AbstractTxn? = null,
     val existingTxnStatus: String? = null
-)
+) {
+    fun transferType() =
+        sourceLines.firstOrNull()?.operation?.toMDTransferType()
+}
 
 data class Position(
     val date: Date,

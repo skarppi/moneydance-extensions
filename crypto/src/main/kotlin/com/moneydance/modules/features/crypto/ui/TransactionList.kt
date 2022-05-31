@@ -3,11 +3,7 @@ package com.moneydance.modules.features.crypto.ui
 import com.moneydance.modules.features.MDApi
 import javax.swing.JPanel
 import javax.swing.JTable
-import javax.swing.DefaultComboBoxModel
-import com.infinitekind.moneydance.model.Reminder
 import javax.swing.ListSelectionModel
-import javax.swing.JComboBox
-import javax.swing.DefaultCellEditor
 import java.awt.BorderLayout
 import com.moneydance.util.UiUtil
 import javax.swing.BorderFactory
@@ -16,7 +12,7 @@ import com.moneydance.apps.md.view.gui.MDAction
 import java.awt.GridBagLayout
 import javax.swing.JButton
 import com.moneydance.awt.GridC
-import com.moneydance.modules.features.crypto.importer.BinanceImporter
+import com.moneydance.modules.features.crypto.services.BinanceImporter
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 

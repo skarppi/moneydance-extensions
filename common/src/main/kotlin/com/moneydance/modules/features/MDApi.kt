@@ -42,6 +42,9 @@ class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     companion object {
         const val ENABLED_KEY = "formula"
         var baseCurrencyType: CurrencyType? = null
+
+        val SHARES_MULTIPLIER = 100000000
+
         private val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
         val decimalChar: Char

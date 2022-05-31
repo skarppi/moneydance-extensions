@@ -3,7 +3,7 @@ import java.io.File
 
 fun main() {
 
-    val book = File("../Mock.moneydance")
+    val book = File("../MockFull.moneydance")
     val api = MockRunner(book).api
 
     CryptoWindow(api).isVisible = true

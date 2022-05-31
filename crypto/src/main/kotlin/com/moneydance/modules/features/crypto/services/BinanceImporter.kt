@@ -1,11 +1,11 @@
-package com.moneydance.modules.features.crypto.importer
+package com.moneydance.modules.features.crypto.services
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.infinitekind.moneydance.model.AbstractTxn
 import com.infinitekind.moneydance.model.AbstractTxn.TRANSFER_TYPE_BANK
 import com.infinitekind.moneydance.model.AbstractTxn.TRANSFER_TYPE_BUYSELL
 import com.infinitekind.moneydance.model.CurrencyUtil
-import com.infinitekind.moneydance.model.ParentTxn
+import com.infinitekind.moneydance.model.InvestTxnType
 import com.moneydance.modules.features.MDApi
 import com.moneydance.modules.features.crypto.model.BinanceTxn
 import com.moneydance.modules.features.crypto.model.CryptoTxn
@@ -44,12 +44,16 @@ enum class BinanceOperation(val binanceName: String) {
 
     fun toMDTransferType(): String? {
         return when(this) {
-            Deposit -> TRANSFER_TYPE_BANK
-            TransferIn -> TRANSFER_TYPE_BANK
-            TransferOut -> TRANSFER_TYPE_BANK
-            Txn -> TRANSFER_TYPE_BUYSELL
-            OTC -> TRANSFER_TYPE_BUYSELL
-            Buy -> TRANSFER_TYPE_BUYSELL
+            Deposit, TransferIn, TransferOut -> TRANSFER_TYPE_BANK
+            Txn, OTC, Buy -> TRANSFER_TYPE_BUYSELL
+            else -> null
+        }
+    }
+
+    fun toMDInvestmentType(value: Double): InvestTxnType? {
+        return when(this) {
+            Deposit, TransferIn, TransferOut -> InvestTxnType.BANK
+            Txn, OTC, Buy -> if (value < 0) InvestTxnType.SELL else InvestTxnType.BUY
             else -> null
         }
     }
@@ -154,7 +158,7 @@ class BinanceImporter(val api: MDApi) {
                 MDApi.log("found $existingTxn")
                 return row.copy(
                     existingTxn = existingTxn,
-                    existingTxnStatus = "$shares shares = ${MDApi.formatCurrency(-existingTxn.value, existingTxn.account.currencyType)} = ${MDApi.formatCurrency((-existingTxn.value * baseCurrency).toLong())}"
+                    existingTxnStatus = "$shares shares2 = ${MDApi.formatCurrency(-existingTxn.value, existingTxn.account.currencyType)} = ${MDApi.formatCurrency((-existingTxn.value * baseCurrency).toLong())}"
                 )
             }
         }
@@ -181,7 +185,13 @@ class BinanceImporter(val api: MDApi) {
 
         val lastTxn = transactions.lastOrNull()
         if (lastTxn != null && lastTxn.date == row.date) {
-            lastTxn.sourceLines.add(rowWithTxn)
+            // new split
+            if (rowWithTxn.amount < 0) {
+                // source is the first
+                lastTxn.sourceLines.add(0, rowWithTxn)
+            } else {
+                lastTxn.sourceLines.add(rowWithTxn)
+            }
 
             transactions.removeLast()
             transactions.add(lastTxn.copy(
@@ -189,6 +199,7 @@ class BinanceImporter(val api: MDApi) {
                 existingTxnStatus = lastTxn.existingTxnStatus ?: rowWithTxn.existingTxnStatus,
             ))
         } else {
+            // new transaction
             val txn = CryptoTxn(
                 row.date,
                 row.account,
