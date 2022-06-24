@@ -1,6 +1,7 @@
 package com.moneydance.modules.features.crypto.model
 
 import com.infinitekind.moneydance.model.AbstractTxn
+import com.moneydance.modules.features.MDApi
 import com.moneydance.modules.features.crypto.services.BinanceAccount
 import com.moneydance.modules.features.crypto.services.BinanceOperation
 import java.math.BigDecimal
@@ -26,19 +27,20 @@ data class BinanceTxn(
     val existingTxn: AbstractTxn? = null,
     val existingTxnStatus: String? = null
 ) {
-    val cents get() = (amount * 100).toLong()
+    val cents
+        get() = (amount * 100).toLong()
 
-    val description = when(coin) {
-        "ADA" -> "Cardano"
-        else -> coin
-    }
+    val security
+        get() = MDApi.securities.get(coin)
+            //?: return MDApi.log("$coin not found")
 
-    val moneydanceSubAccount = when(coin) {
-        "ADA" -> "${account.toMDAccount()}:Cardano"
-        else -> "${account.toMDAccount()}:$coin"
-    }
+    val description = security?.name ?: coin
+
+    val moneydanceSubAccount = "${account.toMDAccount()}:${security?.name ?: coin}"
 
     val memo = if (amount >= 0) "Osto2 ${amount}" else "Myynti2 ${amount}"
+
+    val moneydanceAmount = security?.getLongValue(amount) ?: Math.round(amount * 100)
 }
 
 data class CryptoTxn(

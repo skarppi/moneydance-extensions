@@ -1,11 +1,7 @@
 package com.moneydance.modules.features.crypto.ui
 
 import com.infinitekind.moneydance.model.AbstractTxn
-import com.infinitekind.moneydance.model.ParentTxn
-import com.infinitekind.moneydance.model.SplitTxn
 import com.moneydance.modules.features.MDApi
-import com.moneydance.modules.features.MDApi.Companion.SHARES_MULTIPLIER
-import com.moneydance.modules.features.MDApi.Companion.log
 import com.moneydance.modules.features.crypto.model.CryptoTxn
 import com.moneydance.modules.features.crypto.services.MDInvestments
 import java.time.format.DateTimeFormatter

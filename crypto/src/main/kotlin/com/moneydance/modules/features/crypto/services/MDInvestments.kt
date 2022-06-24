@@ -36,7 +36,7 @@ class MDInvestments {
 
             val splitTxn = SplitTxn.makeSplitTxn(parentTxn,
                 -source.cents,
-                (target.amount * MDApi.SHARES_MULTIPLIER).toLong(),
+                target.moneydanceAmount,
                 1.0,
                 account.getAccountByName(target.moneydanceSubAccount),
                 target.description,

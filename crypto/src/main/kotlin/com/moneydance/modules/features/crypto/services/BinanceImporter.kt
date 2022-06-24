@@ -6,9 +6,11 @@ import com.infinitekind.moneydance.model.AbstractTxn.TRANSFER_TYPE_BANK
 import com.infinitekind.moneydance.model.AbstractTxn.TRANSFER_TYPE_BUYSELL
 import com.infinitekind.moneydance.model.CurrencyUtil
 import com.infinitekind.moneydance.model.InvestTxnType
+import com.infinitekind.moneydance.model.ParentTxn
 import com.moneydance.modules.features.MDApi
 import com.moneydance.modules.features.crypto.model.BinanceTxn
 import com.moneydance.modules.features.crypto.model.CryptoTxn
+import com.moneydance.modules.features.short
 import java.io.File
 import java.time.Instant
 import java.time.LocalDateTime
@@ -152,13 +154,19 @@ class BinanceImporter(val api: MDApi) {
 
             val shares = existingTxn.getOtherTxn(0).value / 100000000.0
 
-            val baseCurrency = CurrencyUtil.getRawRate(existingTxn.account.currencyType, MDApi.baseCurrencyType, existingTxn.dateInt)
-
             if (shares == row.amount) {
                 MDApi.log("found $existingTxn")
+
+                val valueEur =  CurrencyUtil.convertValue(existingTxn.value, existingTxn.account.currencyType, MDApi.baseCurrencyType, existingTxn.dateInt)
+                val coin = existingTxn.getOtherTxn(0).account.currencyType.short()
+
                 return row.copy(
                     existingTxn = existingTxn,
-                    existingTxnStatus = "$shares shares2 = ${MDApi.formatCurrency(-existingTxn.value, existingTxn.account.currencyType)} = ${MDApi.formatCurrency((-existingTxn.value * baseCurrency).toLong())}"
+                    existingTxnStatus = if ((existingTxn as ParentTxn).investTxnType == InvestTxnType.BUY) {
+                        "Buy ${MDApi.formatCurrency(valueEur)} => $shares $coin"
+                    } else {
+                        "Sell $shares $coin => ${MDApi.formatCurrency(valueEur)}"
+                    }
                 )
             }
         }

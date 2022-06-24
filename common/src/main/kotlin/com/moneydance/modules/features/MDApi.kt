@@ -12,12 +12,20 @@ import java.time.format.DateTimeFormatter
 class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     init {
         baseCurrencyType = book.currencies.baseType
+        securities = getSecurities()
     }
 
     fun getInvestmentTransactions(accountName: String): TxnSet {
         val account = context.rootAccount.getAccountByName(accountName, Account.AccountType.INVESTMENT)
         return book.transactionSet.getTransactionsForAccount(account)
     }
+
+    fun getSecurities(): Map<String, CurrencyType> =
+        book.currencies
+            .allCurrencies
+            //.filter { c -> c.currencyType == CurrencyType.Type.SECURITY }
+            .map { c -> c.short() to c}
+            .toMap()
 
     val dateTimeFormat: String
         get() = gui.preferences.shortDateFormat + " " + gui.preferences.timeFormat
@@ -42,8 +50,7 @@ class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     companion object {
         const val ENABLED_KEY = "formula"
         var baseCurrencyType: CurrencyType? = null
-
-        val SHARES_MULTIPLIER = 100000000
+        var securities: Map<String, CurrencyType> = emptyMap()
 
         private val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
@@ -76,3 +83,5 @@ class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
         }
     }
 }
+
+fun CurrencyType.short() = idString.split("-").first()
