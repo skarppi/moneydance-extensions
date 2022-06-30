@@ -146,8 +146,8 @@ class BinanceImporter(val api: MDApi) {
         return null
     }
 
-    private fun buyHandler(row: BinanceTxn, existingTxn: AbstractTxn): BinanceTxn? {
-        if (row.operation == BinanceOperation.Txn && row.coin != "EUR") {
+    private fun buySellHandler(row: BinanceTxn, existingTxn: AbstractTxn): BinanceTxn? {
+        if (row.operation == BinanceOperation.Txn) {
             if (existingTxn.getOtherTxn(0).account.accountName.startsWith("${row.coin}-USDT")) {
                 return null
             }
@@ -186,7 +186,7 @@ class BinanceImporter(val api: MDApi) {
                 }
             }?.mapNotNull {
                 transferHandler(row, it)
-                    ?: buyHandler(row, it)
+                    ?: buySellHandler(row, it)
             }
             ?.firstOrNull()
             ?: row

@@ -31,14 +31,18 @@ data class BinanceTxn(
         get() = (amount * 100).toLong()
 
     val security
-        get() = MDApi.securities.get(coin)
+        get() = MDApi.securities.get(when(coin) {
+            else -> coin
+        })
             //?: return MDApi.log("$coin not found")
 
-    val description = security?.name ?: coin
+    val description = when(coin) {
+        else -> security?.name ?: coin
+    }
 
     val moneydanceSubAccount = "${account.toMDAccount()}:${security?.name ?: coin}"
 
-    val memo = if (amount >= 0) "Osto2 ${amount}" else "Myynti2 ${amount}"
+    val memo = if (amount >= 0) "Osto ${amount}" else "Myynti ${amount}"
 
     val moneydanceAmount = security?.getLongValue(amount) ?: Math.round(amount * 100)
 }

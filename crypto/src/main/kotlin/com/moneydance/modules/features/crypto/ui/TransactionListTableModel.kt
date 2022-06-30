@@ -72,9 +72,13 @@ class TransactionListTableModel(val api: MDApi) : AbstractTableModel() {
                 //api.gui.showTxnInNewWindow(txn.existingTxn)
                 //println(txn.existingTxn)
 
-                when(txn.transferType()) {
-                    AbstractTxn.TRANSFER_TYPE_BUYSELL -> MDInvestments.buySell(txn, api)
-                    //AbstractTxn.TRANSFER_TYPE_BANK -> MDInvestments.transfer(txn, api)
+                try {
+                    when (txn.transferType()) {
+                        AbstractTxn.TRANSFER_TYPE_BUYSELL -> MDInvestments.buySell(txn, api)
+                        //AbstractTxn.TRANSFER_TYPE_BANK -> MDInvestments.transfer(txn, api)
+                    }
+                } catch (e: Exception) {
+                    MDApi.logError(e)
                 }
             }
             else -> ""

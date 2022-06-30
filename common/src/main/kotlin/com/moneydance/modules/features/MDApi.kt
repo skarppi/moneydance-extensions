@@ -12,7 +12,8 @@ import java.time.format.DateTimeFormatter
 class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     init {
         baseCurrencyType = book.currencies.baseType
-        securities = getSecurities()
+        currencies = getCurrencies(CurrencyType.Type.CURRENCY)
+        securities = getCurrencies(CurrencyType.Type.SECURITY)
     }
 
     fun getInvestmentTransactions(accountName: String): TxnSet {
@@ -20,10 +21,10 @@ class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
         return book.transactionSet.getTransactionsForAccount(account)
     }
 
-    fun getSecurities(): Map<String, CurrencyType> =
+    fun getCurrencies(type: CurrencyType.Type): Map<String, CurrencyType> =
         book.currencies
             .allCurrencies
-            //.filter { c -> c.currencyType == CurrencyType.Type.SECURITY }
+            .filter { c -> c.currencyType == type }
             .map { c -> c.short() to c}
             .toMap()
 
@@ -50,6 +51,7 @@ class MDApi(val context: FeatureModuleContext, val gui: MoneydanceGUI) {
     companion object {
         const val ENABLED_KEY = "formula"
         var baseCurrencyType: CurrencyType? = null
+        var currencies: Map<String, CurrencyType> = emptyMap()
         var securities: Map<String, CurrencyType> = emptyMap()
 
         private val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
